@@ -165,7 +165,15 @@ export default function SettingsPage() {
   };
 
   return (
+<<<<<<< HEAD
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+=======
+    <ScrollView 
+      style={styles.container} 
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+>>>>>>> integrate-master
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Ayarlar</Text>
@@ -208,6 +216,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
+<<<<<<< HEAD
+=======
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 100,
+  },
+>>>>>>> integrate-master
   header: {
     padding: 20,
     paddingTop: 60,

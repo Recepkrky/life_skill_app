@@ -1,187 +1,386 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { progressService } from './supabase';
 
-const API_KEY = 'AIzaSyAICRfabtgEwdZnl0jR_SqMGu_R7UWANNA';
+// Gemini API konfigürasyonu - Environment variable kullan
+// YENİ API KEY BURAYA: https://makersuite.google.com/app/apikey adresinden alın
+const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyDyI7NQuwG9bbzJaQ0vG5v4bherYir3TWc';
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-export interface AIResponse {
-  message: string;
-  suggestions?: string[];
-  feedback?: {
-    score: number;
-    improvement: string;
-  };
-}
-
-export interface ScenarioContext {
-  scenarioId: string;
-  character: string;
-  setting: string;
-  userRole: string;
-  objectives: string[];
-}
-
-export class AIService {
-  private static instance: AIService;
-  private model: any;
-
-  static getInstance(): AIService {
-    if (!AIService.instance) {
-      AIService.instance = new AIService();
-    }
-    return AIService.instance;
+// API key test fonksiyonu
+const testAPIKey = async () => {
+  try {
+    console.log('API Key test ediliyor...');
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent("Merhaba");
+    const response = await result.response;
+    console.log('API Key çalışıyor:', response.text());
+    return true;
+  } catch (error) {
+    console.error('API Key hatası:', error);
+    return false;
   }
+};
 
-  constructor() {
-    this.model = genAI.getGenerativeModel({ model: "gemini-pro" });
-  }
+// AI analiz fonksiyonları
+export const aiService = {
+  // API key test fonksiyonu
+  async testAPI() {
+    return await testAPIKey();
+  },
 
-  private getSystemPrompt(context: ScenarioContext): string {
-    return `Sen ${context.character} rolünde bir eğitim asistanısın. Özel bireylerin günlük yaşam becerilerini öğrenmesine yardımcı oluyorsun.
-
-KARAKTER: ${context.character}
-ORTAM: ${context.setting}
-KULLANICI ROLÜ: ${context.userRole}
-HEDEFLER: ${context.objectives.join(', ')}
-
-KURALLAR:
-1. Her zaman nazik, sabırlı ve destekleyici ol
-2. Basit, anlaşılır dil kullan
-3. Cümleler kısa ve net olsun
-4. Kullanıcıyı cesaretlendir ve övgüde bulun
-5. Hata yaptığında nazikçe düzelt
-6. Gerçek hayattaki gibi doğal konuş
-7. Kullanıcının seviyesine uygun yanıt ver
-8. Pozitif geri bildirim ver
-9. Gerektiğinde yönlendirici sorular sor
-10. Senaryonun amacına odaklan
-
-YANIT FORMATI:
-- Doğal, günlük konuşma dili kullan
-- Emoji kullanma
-- Kısa ve öz cevaplar ver (maksimum 2-3 cümle)
-- Kullanıcıyı bir sonraki adıma yönlendir
-
-Şimdi ${context.character} olarak rol yap ve kullanıcıyla etkileşime geç.`;
-  }
-
-  async generateResponse(
-    userMessage: string,
-    context: ScenarioContext,
-    conversationHistory: string[] = []
-  ): Promise<AIResponse> {
+  // Kullanıcının ilerlemesini analiz et
+  async analyzeUserProgress(userId: string) {
     try {
-      const systemPrompt = this.getSystemPrompt(context);
-      const historyText = conversationHistory.length > 0 
-        ? `\n\nÖnceki konuşma:\n${conversationHistory.join('\n')}`
-        : '';
+      const stats = await progressService.getUserStats(userId);
+      const progress = await progressService.getUserProgress(userId);
       
-      const prompt = `${systemPrompt}${historyText}\n\nKullanıcı: ${userMessage}\n\n${context.character}:`;
+      if (!stats || !progress) {
+        return {
+          analysis: 'Henüz yeterli veri yok. Daha fazla senaryo tamamladıktan sonra detaylı analiz yapabilirim.',
+          recommendations: ['İlk senaryonu tamamlamaya başla', 'Günlük pratik yap', 'Farklı kategorileri dene'],
+          strengths: [],
+          weaknesses: [],
+          nextSteps: ['Kolay seviyeden başla', 'Günde en az 1 senaryo tamamla']
+        };
+      }
 
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const message = response.text();
+      // Başarı oranı hesapla
+      const successRate = stats.total_scenarios_completed > 0 
+        ? Math.round((stats.total_score / (stats.total_scenarios_completed * 100)) * 100) 
+        : 0;
 
-      // Önerilen cevapları oluştur
-      const suggestions = await this.generateSuggestions(context, message);
+      // Kategori analizi
+      const categoryAnalysis = this.analyzeCategories(progress);
+      
+      // Zorluk seviyesi analizi
+      const difficultyAnalysis = this.analyzeDifficultyLevels(progress);
+      
+      // Zaman analizi
+      const timeAnalysis = this.analyzeTimeSpent(progress);
+
+      // Güçlü yanlar
+      const strengths = this.identifyStrengths(stats, successRate, categoryAnalysis);
+      
+      // Gelişim alanları
+      const weaknesses = this.identifyWeaknesses(stats, successRate, categoryAnalysis);
+      
+      // Öneriler
+      const recommendations = this.generateRecommendations(stats, weaknesses, categoryAnalysis);
+      
+      // Sonraki adımlar
+      const nextSteps = this.generateNextSteps(stats, weaknesses, categoryAnalysis);
 
       return {
-        message: message.trim(),
-        suggestions,
+        analysis: this.generateAnalysisText(stats, successRate, categoryAnalysis, difficultyAnalysis, timeAnalysis),
+        recommendations,
+        strengths,
+        weaknesses,
+        nextSteps
       };
     } catch (error) {
-      console.error('AI Response Error:', error);
+      console.error('AI analiz hatası:', error);
       return {
-        message: "Özür dilerim, şu anda size yardımcı olamıyorum. Lütfen tekrar deneyin.",
-        suggestions: ["Tamam", "Tekrar dene", "Yardım"]
+        analysis: 'Analiz sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+        recommendations: ['Uygulamayı yeniden başlat', 'İnternet bağlantını kontrol et'],
+        strengths: [],
+        weaknesses: [],
+        nextSteps: []
       };
     }
-  }
+  },
 
-  async generateSuggestions(context: ScenarioContext, aiMessage: string): Promise<string[]> {
+  // Kategori analizi
+  analyzeCategories(progress: any[]) {
+    const categories: { [key: string]: { completed: number; totalScore: number; avgScore: number } } = {};
+    progress.forEach(p => {
+      if (!categories[p.scenario_id]) {
+        categories[p.scenario_id] = {
+          completed: 0,
+          totalScore: 0,
+          avgScore: 0
+        };
+      }
+      categories[p.scenario_id].completed++;
+      categories[p.scenario_id].totalScore += p.score;
+    });
+
+    // Ortalama skorları hesapla
+    Object.keys(categories).forEach(category => {
+      categories[category].avgScore = Math.round(
+        categories[category].totalScore / categories[category].completed
+      );
+    });
+
+    return categories;
+  },
+
+  // Zorluk seviyesi analizi
+  analyzeDifficultyLevels(progress: any[]) {
+    const difficulties: { [key: string]: number } = { kolay: 0, orta: 0, zor: 0 };
+    const scores: { [key: string]: number[] } = { kolay: [], orta: [], zor: [] };
+
+    progress.forEach(p => {
+      // Senaryo zorluğunu belirle (bu kısım senaryo verilerine göre geliştirilebilir)
+      const difficulty = this.getScenarioDifficulty(p.scenario_id);
+      difficulties[difficulty]++;
+      scores[difficulty].push(p.score);
+    });
+
+    return { difficulties, scores };
+  },
+
+  // Zaman analizi
+  analyzeTimeSpent(progress: any[]) {
+    const totalTime = progress.reduce((sum, p) => sum + p.time_spent, 0);
+    const avgTime = progress.length > 0 ? totalTime / progress.length : 0;
+    
+    return {
+      totalTime,
+      avgTime,
+      totalSessions: progress.length
+    };
+  },
+
+  // Güçlü yanları belirle
+  identifyStrengths(stats: any, successRate: number, categoryAnalysis: any) {
+    const strengths = [];
+    
+    if (successRate >= 80) {
+      strengths.push('Yüksek başarı oranı');
+    }
+    
+    if (stats.current_streak >= 3) {
+      strengths.push('Tutarlı çalışma alışkanlığı');
+    }
+    
+    if (stats.total_scenarios_completed >= 10) {
+      strengths.push('Deneyimli kullanıcı');
+    }
+
+    // En iyi kategori
+    const bestCategory = this.findBestCategory(categoryAnalysis);
+    if (bestCategory) {
+      strengths.push(`${bestCategory} kategorisinde güçlü`);
+    }
+
+    return strengths;
+  },
+
+  // Gelişim alanlarını belirle
+  identifyWeaknesses(stats: any, successRate: number, categoryAnalysis: any) {
+    const weaknesses = [];
+    
+    if (successRate < 60) {
+      weaknesses.push('Başarı oranını artırma ihtiyacı');
+    }
+    
+    if (stats.current_streak < 2) {
+      weaknesses.push('Düzenli çalışma alışkanlığı geliştirme');
+    }
+    
+    if (stats.total_scenarios_completed < 5) {
+      weaknesses.push('Daha fazla deneyim kazanma');
+    }
+
+    // En zayıf kategori
+    const worstCategory = this.findWorstCategory(categoryAnalysis);
+    if (worstCategory) {
+      weaknesses.push(`${worstCategory} kategorisinde gelişim alanı`);
+    }
+
+    return weaknesses;
+  },
+
+  // Öneriler oluştur
+  generateRecommendations(stats: any, weaknesses: string[], categoryAnalysis: any) {
+    const recommendations = [];
+    
+    if (weaknesses.includes('Başarı oranını artırma ihtiyacı')) {
+      recommendations.push('Daha fazla dikkatle senaryoları tamamla');
+      recommendations.push('Yanlış yaptığın soruları tekrar gözden geçir');
+    }
+    
+    if (weaknesses.includes('Düzenli çalışma alışkanlığı geliştirme')) {
+      recommendations.push('Günde en az 1 senaryo tamamlamaya çalış');
+      recommendations.push('Hatırlatıcılar kur');
+    }
+    
+    if (weaknesses.includes('Daha fazla deneyim kazanma')) {
+      recommendations.push('Farklı kategorilerdeki senaryoları dene');
+      recommendations.push('Zorluk seviyesini kademeli olarak artır');
+    }
+
+    return recommendations;
+  },
+
+  // Sonraki adımlar oluştur
+  generateNextSteps(stats: any, weaknesses: string[], categoryAnalysis: any) {
+    const nextSteps = [];
+    
+    if (stats.total_scenarios_completed < 5) {
+      nextSteps.push('Kolay seviyeden başla');
+      nextSteps.push('Günde 1 senaryo tamamla');
+    } else if (stats.total_scenarios_completed < 10) {
+      nextSteps.push('Orta seviyeye geç');
+      nextSteps.push('Farklı kategorileri dene');
+    } else {
+      nextSteps.push('Zor seviyeleri dene');
+      nextSteps.push('Eksik kategorileri tamamla');
+    }
+
+    return nextSteps;
+  },
+
+  // Analiz metni oluştur
+  generateAnalysisText(stats: any, successRate: number, categoryAnalysis: any, difficultyAnalysis: any, timeAnalysis: any) {
+    let analysis = `📊 İlerleme Analizin:\n\n`;
+    
+    analysis += `✅ Tamamlanan Senaryo: ${stats.total_scenarios_completed}\n`;
+    analysis += `🎯 Başarı Oranı: %${successRate}\n`;
+    analysis += `⏱️ Toplam Süre: ${Math.floor(timeAnalysis.totalTime / 60)} dk\n`;
+    analysis += `🏆 Toplam Puan: ${stats.total_score}\n`;
+    analysis += `🔥 Mevcut Seri: ${stats.current_streak} gün\n\n`;
+
+    if (successRate >= 80) {
+      analysis += `🌟 Mükemmel! Çok yüksek bir başarı oranın var. Sen gerçekten harika gidiyorsun!\n\n`;
+    } else if (successRate >= 60) {
+      analysis += `👍 İyi gidiyorsun! Başarı oranını biraz daha artırabilirsin.\n\n`;
+    } else {
+      analysis += `💪 Başarı oranını artırmak için daha fazla pratik yapmalısın.\n\n`;
+    }
+
+    if (stats.current_streak >= 3) {
+      analysis += `🔥 Harika! ${stats.current_streak} günlük serin var. Bu tutarlılığı koru!\n\n`;
+    } else {
+      analysis += `📅 Düzenli çalışma alışkanlığı geliştirmeye odaklan.\n\n`;
+    }
+
+    return analysis;
+  },
+
+  // En iyi kategoriyi bul
+  findBestCategory(categoryAnalysis: any) {
+    let bestCategory = null;
+    let bestScore = 0;
+
+    Object.keys(categoryAnalysis).forEach(category => {
+      if (categoryAnalysis[category].avgScore > bestScore) {
+        bestScore = categoryAnalysis[category].avgScore;
+        bestCategory = category;
+      }
+    });
+
+    return bestCategory;
+  },
+
+  // En zayıf kategoriyi bul
+  findWorstCategory(categoryAnalysis: any) {
+    let worstCategory = null;
+    let worstScore = 100;
+
+    Object.keys(categoryAnalysis).forEach(category => {
+      if (categoryAnalysis[category].avgScore < worstScore) {
+        worstScore = categoryAnalysis[category].avgScore;
+        worstCategory = category;
+      }
+    });
+
+    return worstCategory;
+  },
+
+  // Senaryo zorluğunu belirle
+  getScenarioDifficulty(scenarioId: string) {
+    // Bu kısım senaryo verilerine göre geliştirilebilir
+    const easyScenarios = ['market-simple', 'bus-simple'];
+    const mediumScenarios = ['doctor-visit', 'online-shopping'];
+    const hardScenarios = ['emergency-call', 'job-interview'];
+
+    if (easyScenarios.includes(scenarioId)) return 'kolay';
+    if (mediumScenarios.includes(scenarioId)) return 'orta';
+    if (hardScenarios.includes(scenarioId)) return 'zor';
+    
+    return 'orta'; // varsayılan
+  },
+
+  // Gemini AI ile gerçek AI yanıtı al
+  async generateResponse(userMessage: string, userId: string) {
+    console.log('AI generateResponse çağrıldı:', userMessage, userId);
+    
     try {
-      const prompt = `${context.character} şu mesajı verdi: "${aiMessage}"
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      // Kullanıcı verilerini al
+      let userContext = '';
+      try {
+        const stats = await progressService.getUserStats(userId);
+        if (stats) {
+          userContext = `
+Kullanıcı Bilgileri:
+- Tamamlanan Senaryo: ${stats.total_scenarios_completed}
+- Toplam Puan: ${stats.total_score}
+- Günlük Seri: ${stats.current_streak}
+- Başarı Oranı: %${Math.round((stats.total_score / (stats.total_scenarios_completed * 100)) * 100) || 0}
+`;
+        }
+      } catch (error) {
+        console.log('Kullanıcı verileri alınamadı:', error);
+      }
 
-Bu durumda kullanıcının verebileceği 3 uygun cevap önerisi sun. Cevaplar:
-- Basit ve anlaşılır olmalı
-- Senaryonun amacına uygun olmalı
-- Farklı nezaket seviyelerinde olmalı
+      const prompt = `Sen özel bireylere günlük yaşam becerileri öğreten yardımcı bir AI asistanısın. 
 
-Sadece cevapları ver, açıklama yapma:`;
+${userContext}
 
-      const result = await this.model.generateContent(prompt);
+Kullanıcı: ${userMessage}
+
+Senin görevin:
+1. Nazik, sabırlı ve destekleyici ol
+2. Basit, anlaşılır Türkçe kullan
+3. Emoji kullan (günde 2-3 tane)
+4. Kullanıcının seviyesine uygun yanıt ver
+5. Motivasyon sağla
+6. Günlük yaşam becerileri hakkında yardım et
+7. Senaryo önerileri sun
+8. İlerleme analizi yap
+
+Yanıtını Türkçe olarak ver:`;
+
+      const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      
-      return text.split('\n')
-        .filter(line => line.trim())
-        .map(line => line.replace(/^\d+\.\s*/, '').trim())
-        .slice(0, 3);
-    } catch (error) {
-      console.error('Suggestions Error:', error);
-      return ["Teşekkür ederim", "Anlıyorum", "Tamam"];
-    }
-  }
 
-  async evaluateUserResponse(
-    userMessage: string,
-    context: ScenarioContext,
-    expectedBehavior: string
-  ): Promise<{ score: number; feedback: string; suggestions: string[] }> {
-    try {
-      const prompt = `Kullanıcı "${userMessage}" dedi.
-Senaryo: ${context.setting}
-Beklenen davranış: ${expectedBehavior}
-
-Bu cevabı 1-10 arasında değerlendir ve kısa geri bildirim ver:
-- Nezaket seviyesi
-- Uygunluk
-- İletişim becerisi
-
-Format:
-Puan: X
-Geri bildirim: [kısa pozitif geri bildirim]`;
-
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      const scoreMatch = text.match(/Puan:\s*(\d+)/);
-      const feedbackMatch = text.match(/Geri bildirim:\s*(.+)/);
-      
-      const score = scoreMatch ? parseInt(scoreMatch[1]) : 7;
-      const feedback = feedbackMatch ? feedbackMatch[1] : "İyi bir cevap!";
+      console.log('Gemini yanıtı:', text);
 
       return {
-        score,
-        feedback,
-        suggestions: ["Devam et", "Başka soru sor", "Teşekkür et"]
+        type: 'ai_response',
+        content: text.trim()
       };
+
     } catch (error) {
-      console.error('Evaluation Error:', error);
+      console.error('Gemini API hatası:', error);
+      
+      // Fallback: Basit kurallar
+      const message = userMessage.toLowerCase();
+      
+      if (message.includes('ilerleme') || message.includes('analiz') || message.includes('durum')) {
+        const analysis = await this.analyzeUserProgress(userId);
+        return {
+          type: 'analysis',
+          content: analysis.analysis,
+          data: analysis
+        };
+      }
+
+      if (message.includes('motivasyon') || message.includes('cesaret') || message.includes('yorgun')) {
+        return {
+          type: 'motivation',
+          content: '💪 Her gün küçük adımlar atarak büyük değişiklikler yaratabilirsin! Sen güçlüsün ve her zorluğun üstesinden gelebilirsin.'
+        };
+      }
+
       return {
-        score: 7,
-        feedback: "İyi bir cevap! Devam et.",
-        suggestions: ["Devam et", "Başka soru sor", "Teşekkür et"]
+        type: 'chat',
+        content: 'Merhaba! 👋 Size nasıl yardımcı olabilirim? Senaryolarınız hakkında soru sorabilir, ilerleme analizi isteyebilir veya motivasyon desteği alabilirsiniz.'
       };
     }
   }
-
-  async getGeneralHelp(question: string): Promise<string> {
-    try {
-      const prompt = `Sen özel bireylere günlük yaşam becerileri öğreten yardımcı bir asistansın.
-
-Soru: ${question}
-
-Kısa, anlaşılır ve yardımcı bir cevap ver. Basit dil kullan ve pozitif ol.`;
-
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      return response.text().trim();
-    } catch (error) {
-      console.error('General Help Error:', error);
-      return "Size yardımcı olmaya çalışıyorum. Sorunuzu daha basit şekilde sorabilir misiniz?";
-    }
-  }
-}
-
-export const aiService = AIService.getInstance();
+};

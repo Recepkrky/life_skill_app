@@ -1,205 +1,289 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
-  StyleSheet,
   TextInput,
-  Modal,
+  TouchableOpacity,
   ScrollView,
+  StyleSheet,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import { MessageCircle, X, Send, Trophy, Star } from 'lucide-react-native';
-import { aiService } from '@/utils/ai';
+import { 
+  Send, 
+  Bot, 
+  X
+} from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '@/contexts/AuthContext';
+import { aiService } from '@/utils/ai';
 
-interface AIAssistantProps {
-  visible: boolean;
-  onClose: () => void;
-}
-
-interface ChatMessage {
-  id: number;
+interface Message {
+  id: string;
   text: string;
   isAI: boolean;
   timestamp: Date;
 }
 
-export default function AIAssistant({ visible, onClose }: AIAssistantProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 1,
-      text: "Merhaba! Ben senin AI asistanınım. Günlük yaşam becerileri hakkında sorularını cevaplayabilirim. Nasıl yardımcı olabilirim? 🎯",
+interface AIAssistantProps {
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (isVisible) {
+      addWelcomeMessage();
+    }
+  }, [isVisible]);
+
+  const addWelcomeMessage = () => {
+    const welcomeMessage: Message = {
+      id: Date.now().toString(),
+      text: `Merhaba! Ben senin kişisel asistanın. 🎯\n\nSenaryolarındaki ilerlemeni analiz edebilir, öneriler sunabilir ve sorularını yanıtlayabilirim.\n\nNasıl yardımcı olabilirim?`,
       isAI: true,
       timestamp: new Date(),
-    }
-  ]);
+    };
+    setMessages([welcomeMessage]);
+  };
 
-  const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const sendMessage = async () => {
+    if (!inputText.trim()) return;
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
+    console.log('Mesaj gönderiliyor:', inputText);
 
-    const userMessage: ChatMessage = {
-      id: Date.now(),
-      text: text.trim(),
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: inputText,
       isAI: false,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
-    setIsLoading(true);
+    setIsTyping(true);
 
+    // Gerçek AI yanıtı al
     try {
-      const response = await aiService.getGeneralHelp(text.trim());
+      console.log('AI servisi çağrılıyor...');
+      const response = await aiService.generateResponse(inputText, user?.id || '');
+      console.log('AI yanıtı alındı:', response);
       
-      const aiMessage: ChatMessage = {
-        id: Date.now() + 1,
-        text: response,
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: response.content,
         isAI: true,
         timestamp: new Date(),
       };
-
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('AI Assistant Error:', error);
-      const errorMessage: ChatMessage = {
-        id: Date.now() + 1,
-        text: "Özür dilerim, şu anda size yardımcı olamıyorum. Lütfen tekrar deneyin. 😔",
+      console.error('AI yanıt hatası:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'Özür dilerim, şu anda size yardımcı olamıyorum. Lütfen tekrar deneyin.',
         isAI: true,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
-      setIsLoading(false);
+      setIsTyping(false);
     }
   };
 
+  const testAPI = async () => {
+    try {
+      console.log('API test ediliyor...');
+      const isWorking = await aiService.testAPI();
+      const testMessage: Message = {
+        id: Date.now().toString(),
+        text: isWorking ? '✅ API bağlantısı çalışıyor!' : '❌ API bağlantısı hatası!',
+        isAI: true,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, testMessage]);
+    } catch (error) {
+      console.error('API test hatası:', error);
+    }
+  };
+
+  const getProgressAnalysis = async () => {
+    try {
+      setIsTyping(true);
+      const analysis = await aiService.analyzeUserProgress(user?.id || '');
+      
+      const analysisMessage: Message = {
+        id: Date.now().toString(),
+        text: analysis.analysis,
+        isAI: true,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, analysisMessage]);
+    } catch (error) {
+      console.error('İlerleme analizi hatası:', error);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const getPersonalRecommendations = async () => {
+    try {
+      setIsTyping(true);
+      const analysis = await aiService.analyzeUserProgress(user?.id || '');
+      
+      let recommendationsText = '💡 **Kişisel Önerileriniz:**\n\n';
+      
+      if (analysis.recommendations && analysis.recommendations.length > 0) {
+        analysis.recommendations.forEach((rec, index) => {
+          recommendationsText += `${index + 1}. ${rec}\n`;
+        });
+      }
+      
+      if (analysis.nextSteps && analysis.nextSteps.length > 0) {
+        recommendationsText += '\n🎯 **Sonraki Adımlar:**\n';
+        analysis.nextSteps.forEach((step, index) => {
+          recommendationsText += `${index + 1}. ${step}\n`;
+        });
+      }
+      
+      const recommendationsMessage: Message = {
+        id: Date.now().toString(),
+        text: recommendationsText,
+        isAI: true,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, recommendationsMessage]);
+    } catch (error) {
+      console.error('Öneriler hatası:', error);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const renderMessage = (message: Message) => (
+    <View key={message.id} style={[
+      styles.messageContainer,
+      message.isAI ? styles.aiMessage : styles.userMessage
+    ]}>
+      <View style={[
+        styles.messageBubble,
+        message.isAI ? styles.aiBubble : styles.userBubble
+      ]}>
+        <Text style={[
+          styles.messageText,
+          message.isAI ? styles.aiText : styles.userText
+        ]}>
+          {message.text}
+        </Text>
+      </View>
+      <View style={styles.messageInfo}>
+        <Text style={styles.timestamp}>
+          {message.timestamp.toLocaleTimeString('tr-TR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })}
+        </Text>
+      </View>
+    </View>
+  );
+
   return (
     <Modal
-      visible={visible}
+      visible={isVisible}
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <LinearGradient
-        colors={['#4A90E2', '#357ABD']}
-        style={styles.container}
-      >
-        {/* Header */}
+      <View style={styles.container}>
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)']}
-          style={styles.header}
+          colors={['#1E293B', '#334155']}
+          style={styles.gradient}
         >
-          <View style={styles.headerContent}>
-            <View style={styles.titleContainer}>
-              <MessageCircle size={24} color="#FFD93D" strokeWidth={2} />
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <Bot size={24} color="#FFFFFF" />
               <Text style={styles.headerTitle}>AI Asistan</Text>
             </View>
-            <Text style={styles.headerSubtitle}>Seni destekliyorum! 💪</Text>
-          </View>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X size={24} color="rgba(255, 255, 255, 0.8)" strokeWidth={2} />
-          </TouchableOpacity>
-        </LinearGradient>
-
-        {/* Messages */}
-        <ScrollView style={styles.messagesContainer} showsVerticalScrollIndicator={false}>
-          {messages.map((message) => (
-            <View
-              key={message.id}
-              style={[
-                styles.messageContainer,
-                message.isAI ? styles.aiMessage : styles.userMessage,
-              ]}
-            >
-              <LinearGradient
-                colors={
-                  message.isAI 
-                    ? ['#FFFFFF', '#F8F9FA']
-                    : ['#FFD93D', '#FFB800']
-                }
-                style={[
-                  styles.messageBubble,
-                  message.isAI ? styles.aiMessageBubble : styles.userMessageBubble,
-                ]}
+            <View style={styles.headerButtons}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={getProgressAnalysis}
               >
-                <Text
-                  style={[
-                    styles.messageText,
-                    message.isAI ? styles.aiMessageText : styles.userMessageText,
-                  ]}
-                >
-                  {message.text}
-                </Text>
-                <Text
-                  style={[
-                    styles.timestamp,
-                    message.isAI ? styles.aiTimestamp : styles.userTimestamp,
-                  ]}
-                >
-                  {message.timestamp.toLocaleTimeString('tr-TR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </Text>
-              </LinearGradient>
+                <Text style={styles.actionButtonText}>📊 Analiz</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={getPersonalRecommendations}
+              >
+                <Text style={styles.actionButtonText}>💡 Öneriler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.testButton}
+                onPress={testAPI}
+              >
+                <Text style={styles.testButtonText}>Test</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={onClose}
+              >
+                <X size={24} color="#FFFFFF" />
+              </TouchableOpacity>
             </View>
-          ))}
-          
-          {isLoading && (
-            <View style={[styles.messageContainer, styles.aiMessage]}>
-              <LinearGradient
-                colors={['#FFFFFF', '#F8F9FA']}
-                style={[styles.messageBubble, styles.aiMessageBubble]}
-              >
-                <View style={styles.loadingContainer}>
-                  <Star size={16} color="#FFD93D" strokeWidth={2} fill="#FFD93D" />
-                  <Text style={styles.loadingText}>Düşünüyor...</Text>
+          </View>
+
+          {/* Messages */}
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.messagesContainer}
+            contentContainerStyle={styles.messagesContent}
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd()}
+          >
+            {messages.map(renderMessage)}
+            {isTyping && (
+              <View style={[styles.messageContainer, styles.aiMessage]}>
+                <View style={[styles.messageBubble, styles.aiBubble]}>
+                  <Text style={[styles.messageText, styles.aiText]}>
+                    Yazıyor...
+                  </Text>
                 </View>
-              </LinearGradient>
-            </View>
-          )}
-        </ScrollView>
+              </View>
+            )}
+          </ScrollView>
 
-        {/* Input Area */}
-        <LinearGradient
-          colors={['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)']}
-          style={styles.inputContainer}
-        >
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Sorunuzu yazın..."
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-              placeholderTextColor="rgba(255, 255, 255, 0.6)"
-            />
-            
-            <TouchableOpacity
-              style={[
-                styles.sendButton,
-                inputText.trim() && styles.sendButtonActive,
-              ]}
-              onPress={() => sendMessage(inputText)}
-              disabled={!inputText.trim() || isLoading}
-            >
-              <LinearGradient
-                colors={
-                  inputText.trim() 
-                    ? ['#FFD93D', '#FFB800']
-                    : ['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)']
-                }
-                style={styles.sendButtonGradient}
+          {/* Input */}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.inputContainer}
+          >
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                value={inputText}
+                onChangeText={setInputText}
+                placeholder="Mesajınızı yazın..."
+                placeholderTextColor="#94A3B8"
+                multiline
+                maxLength={500}
+              />
+              <TouchableOpacity
+                style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
+                onPress={sendMessage}
+                disabled={!inputText.trim()}
               >
-                <Send size={18} color="#FFFFFF" strokeWidth={2} />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+                <Send size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
         </LinearGradient>
-      </LinearGradient>
+      </View>
     </Modal>
   );
 }
@@ -208,137 +292,138 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  gradient: {
+    flex: 1,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
-    paddingBottom: 16,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    paddingTop: 60,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#475569',
   },
   headerContent: {
-    flex: 1,
-  },
-  titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    gap: 12,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginLeft: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginLeft: 32,
   },
   closeButton: {
     padding: 8,
   },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  actionButton: {
+    backgroundColor: '#3B82F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 15,
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  testButton: {
+    backgroundColor: '#3B82F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 15,
+  },
+  testButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   messagesContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 16,
+  },
+  messagesContent: {
+    paddingVertical: 20,
   },
   messageContainer: {
-    marginVertical: 8,
-    maxWidth: '85%',
+    marginBottom: 16,
   },
   aiMessage: {
-    alignSelf: 'flex-start',
+    alignItems: 'flex-start',
   },
   userMessage: {
-    alignSelf: 'flex-end',
+    alignItems: 'flex-end',
   },
   messageBubble: {
+    maxWidth: '80%',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  aiMessageBubble: {
-    borderBottomLeftRadius: 8,
+  aiBubble: {
+    backgroundColor: '#475569',
+    borderBottomLeftRadius: 4,
   },
-  userMessageBubble: {
-    borderBottomRightRadius: 8,
+  userBubble: {
+    backgroundColor: '#3B82F6',
+    borderBottomRightRadius: 4,
   },
   messageText: {
     fontSize: 16,
     lineHeight: 22,
-    marginBottom: 4,
   },
-  aiMessageText: {
-    color: '#2C3E50',
-  },
-  userMessageText: {
+  aiText: {
     color: '#FFFFFF',
+  },
+  userText: {
+    color: '#FFFFFF',
+  },
+  messageInfo: {
+    marginTop: 4,
+    paddingHorizontal: 16,
   },
   timestamp: {
     fontSize: 12,
-    opacity: 0.7,
-  },
-  aiTimestamp: {
-    color: '#6C757D',
-  },
-  userTimestamp: {
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  loadingText: {
-    color: '#6C757D',
-    fontStyle: 'italic',
+    color: '#94A3B8',
   },
   inputContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderTopWidth: 1,
+    borderTopColor: '#475569',
   },
-  inputRow: {
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 12,
   },
   textInput: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#475569',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
     color: '#FFFFFF',
     maxHeight: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    minHeight: 44,
   },
   sendButton: {
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  sendButtonGradient: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    backgroundColor: '#3B82F6',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sendButtonActive: {
-    // Gradient is handled in the component
+  sendButtonDisabled: {
+    backgroundColor: '#64748B',
   },
 });

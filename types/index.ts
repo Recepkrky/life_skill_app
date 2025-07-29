@@ -33,7 +33,7 @@ export interface SimpleScenario {
   color: string;
   steps: ScenarioStep[];
   completed: boolean;
-  category: 'Günlük' | 'Ulaşım' | 'Sağlık' | 'Teknoloji' | 'Eğlence' | 'Eğitim';
+  category: 'Günlük' | 'Ulaşım' | 'Sağlık' | 'Toplum';
   maxScore: number;
 }
 

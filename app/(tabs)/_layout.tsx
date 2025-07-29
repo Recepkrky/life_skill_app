@@ -92,6 +92,7 @@ export default function TabLayout() {
                 <MessageCircle size={size} color={color} strokeWidth={2} />
               </View>
             ),
+<<<<<<< HEAD
             tabBarButton: (props) => (
               <TouchableOpacity
                 {...props}
@@ -99,6 +100,8 @@ export default function TabLayout() {
                 style={styles.aiButton}
               />
             ),
+=======
+>>>>>>> integrate-master
           }}
         />
         <Tabs.Screen
@@ -126,7 +129,11 @@ export default function TabLayout() {
       </Tabs>
       
       <AIAssistant 
+<<<<<<< HEAD
         visible={showAI} 
+=======
+        isVisible={showAI} 
+>>>>>>> integrate-master
         onClose={() => setShowAI(false)} 
       />
     </>
