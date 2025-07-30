@@ -36,8 +36,8 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-                      tabBarActiveTintColor: '#4A90E2',
-            tabBarInactiveTintColor: 'rgba(74, 144, 226, 0.6)',
+          tabBarActiveTintColor: '#4A90E2',
+          tabBarInactiveTintColor: 'rgba(74, 144, 226, 0.6)',
           tabBarStyle: {
             backgroundColor: '#FFFFFF',
             borderTopWidth: 0,
@@ -92,7 +92,6 @@ export default function TabLayout() {
                 <MessageCircle size={size} color={color} strokeWidth={2} />
               </View>
             ),
-<<<<<<< HEAD
             tabBarButton: (props) => (
               <TouchableOpacity
                 {...props}
@@ -100,8 +99,6 @@ export default function TabLayout() {
                 style={styles.aiButton}
               />
             ),
-=======
->>>>>>> integrate-master
           }}
         />
         <Tabs.Screen
@@ -129,11 +126,7 @@ export default function TabLayout() {
       </Tabs>
       
       <AIAssistant 
-<<<<<<< HEAD
-        visible={showAI} 
-=======
         isVisible={showAI} 
->>>>>>> integrate-master
         onClose={() => setShowAI(false)} 
       />
     </>

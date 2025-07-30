@@ -1197,6 +1197,346 @@ export const scenarios: SimpleScenario[] = [
         previousStepId: 'tren-23'
       }
     ]
+  },
+
+  // Yeni Senaryo: Postaneden Kargo Gönderme
+  {
+    id: 'post-office-shipment',
+    title: 'Postaneden Kargo Gönderme',
+    description: 'Görevliyle iletişim kurarak kargo gönderimi yapmak',
+    difficulty: 'Zor',
+    icon: Briefcase,
+    color: '#FF9800',
+    completed: false,
+    category: 'Günlük',
+    maxScore: 130,
+    steps: [
+      {
+        id: 'step1',
+        question: 'Postaneye girdin, görevli "Hoş geldiniz" dedi. Ne söylersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1607083203389-8429b47c86a8',
+        options: [
+          { id: 'a', text: 'Fiyatlar ne kadar?', isCorrect: false, feedback: 'Önce ne yapmak istediğini belirtmelisin.' },
+          { id: 'b', text: 'Sessiz kalırım', isCorrect: false, feedback: 'İlk adımda konuşmak önemli.' },
+          { id: 'c', text: 'Kargo yollamak istiyorum', isCorrect: true, feedback: 'Amacını net bir şekilde ifade ettin.' },
+          { id: 'd', text: 'Kargo alacağım', isCorrect: false, feedback: 'Bu senaryoda sen kargo gönderiyorsun.' }
+        ],
+        correctOptionId: 'c',
+        nextStepId: 'step2'
+      },
+      {
+        id: 'step2',
+        question: 'Görevli "Ne göndereceksiniz?" diye sordu. Ne dersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1599470136316-1e1a4f6fda63',
+        options: [
+          { id: 'a', text: 'Hiçbir şey', isCorrect: false, feedback: 'Bir şey gönderiyorsun, belirtmen gerekir.' },
+          { id: 'b', text: 'Bir kutu belge göndereceğim', isCorrect: true, feedback: 'Ne göndereceğini net belirttin.' },
+          { id: 'c', text: 'Ne fark eder', isCorrect: false, feedback: 'Görevlinin bilgisi olması gerekir.' },
+          { id: 'd', text: 'Evimi gönderiyorum', isCorrect: false, feedback: 'Bu mantıklı bir cevap değil.' }
+        ],
+        correctOptionId: 'b',
+        nextStepId: 'step3'
+      },
+      {
+        id: 'step3',
+        question: 'Görevli "Alıcı adresini yazar mısınız?" dedi. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1610484826967-0f4263c8077e',
+        options: [
+          { id: 'a', text: 'Yazmak istemem', isCorrect: false, feedback: 'Adres olmadan gönderim yapılamaz.' },
+          { id: 'b', text: 'Kendi adresimi yazarım', isCorrect: false, feedback: 'Alıcının adresi gerekli.' },
+          { id: 'c', text: 'Adresi söylerim ama yazmam', isCorrect: false, feedback: 'Yazılı olması gereklidir.' },
+          { id: 'd', text: 'Adres bilgilerini yazarım', isCorrect: true, feedback: 'Doğru, adres yazımı önemli.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step4'
+      },
+      {
+        id: 'step4',
+        question: 'Görevli "Hızlı mı normal kargo mu?" dedi. Ne dersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1633780350701-d3f926da0a6d',
+        options: [
+          { id: 'a', text: 'Hiç fark etmez', isCorrect: false, feedback: 'Bir tercih belirtmelisin.' },
+          { id: 'b', text: 'Normal olsun', isCorrect: true, feedback: 'Teslim süresine karar verdin.' },
+          { id: 'c', text: 'İkisini de istiyorum', isCorrect: false, feedback: 'Sadece biri seçilmeli.' },
+          { id: 'd', text: 'Kargoyu iptal edin', isCorrect: false, feedback: 'Gönderim yapacaksın, iptal değil.' }
+        ],
+        correctOptionId: 'b',
+        nextStepId: 'step5'
+      },
+      {
+        id: 'step5',
+        question: 'Görevli "Gönderinizin içinde belge olduğunu belirttiniz. Islanmaya karşı önlem alınmasını ister misiniz?" diye soruyor. Ne dersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1611251086975-62b6f38ccdb7',
+        options: [
+          { id: 'a', text: 'Evet, su geçirmez poşete koyabilir misiniz?', isCorrect: true, feedback: 'Doğru, belgelerin zarar görmemesi için önlem almak önemlidir.' },
+          { id: 'b', text: 'Hayır, bir şey olmaz', isCorrect: false, feedback: 'Belge gönderilerinde önlem almak her zaman daha güvenlidir.' },
+          { id: 'c', text: 'Fark etmez', isCorrect: false, feedback: 'Kararsız cevaplar yerine net talimat vermelisin.' },
+          { id: 'd', text: 'Ne demek istediğinizi anlamadım', isCorrect: false, feedback: 'Görevliye açıklattıktan sonra tercihini belirtebilirsin.' }
+        ],
+        correctOptionId: 'a',
+        nextStepId: 'step6'
+      },
+      {
+        id: 'step6',
+        question: 'Görevli paketi tarttı ve fiyat söyledi. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1606744824166-455ed8855795',
+        options: [
+          { id: 'a', text: 'Paket ağırmış', isCorrect: false, feedback: 'Görevliye ödeme şekli söylemelisin.' },
+          { id: 'b', text: 'Gitmekten vazgeçerim', isCorrect: false, feedback: 'Gönderimi tamamlamak için ödeme yapmalısın.' },
+          { id: 'c', text: 'Ödeme yöntemimi söylerim', isCorrect: true, feedback: 'Doğru, bir ödeme yöntemi seçmelisin.' },
+          { id: 'd', text: 'Hiçbir şey yapmam', isCorrect: false, feedback: 'Cevap vermen gerekiyor.' }
+        ],
+        correctOptionId: 'c',
+        nextStepId: 'step7'
+      },
+      {
+        id: 'step7',
+        question: 'Ödeme yapıldı. Görevli "Fiş ister misiniz?" diyor. Ne dersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1611421718082-f21c305c5a0c',
+        options: [
+          { id: 'a', text: 'Evet, alayım', isCorrect: true, feedback: 'Fiş almak ileride lazım olabilir.' },
+          { id: 'b', text: 'İstemez', isCorrect: false, feedback: 'Fiş alman önerilir.' },
+          { id: 'c', text: 'Bilmiyorum', isCorrect: false, feedback: 'Tercihini net belirtmelisin.' },
+          { id: 'd', text: 'Ne fişi?', isCorrect: false, feedback: 'Ödeme sonrası fiş almak yaygındır.' }
+        ],
+        correctOptionId: 'a',
+        nextStepId: 'step8'
+      },
+      {
+        id: 'step8',
+        question: 'Paketin üstüne barkod etiketi yapıştırılıyor. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1603126857091-9ff23a86a106',
+        options: [
+          { id: 'a', text: 'Bana ne', isCorrect: false, feedback: 'Nazik olmalısın.' },
+          { id: 'b', text: 'O ne işe yarıyor?', isCorrect: false, feedback: 'Şüphelenmeden işlemi takip et.' },
+          { id: 'c', text: 'Hiçbir şey söylemem', isCorrect: false, feedback: 'Nazikçe karşılık vermek iyidir.' },
+          { id: 'd', text: 'Teşekkür ederim', isCorrect: true, feedback: 'Nazikçe teşekkür ettin.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step9'
+      },
+      {
+        id: 'step9',
+        question: 'Görevli "Teslimat takip numaranız budur" diyor. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1605283164920-542cf3a65d8a',
+        options: [
+          { id: 'a', text: 'Gerek yok derim', isCorrect: false, feedback: 'Bu bilgi önemli.' },
+          { id: 'b', text: 'Kime lazım?', isCorrect: false, feedback: 'Sana lazım olacak.' },
+          { id: 'c', text: 'Kaybederim', isCorrect: false, feedback: 'Kaybetmemeye çalışmalısın.' },
+          { id: 'd', text: 'Numarayı not alırım', isCorrect: true, feedback: 'Doğru, takip için gerekli.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step10'
+      },
+      {
+        id: 'step10',
+        question: 'Görevli, kargonun tahmini teslim süresini bildiriyor. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1589998059171-988d3b4a1aa5',
+        options: [
+          { id: 'a', text: 'Beni ilgilendirmez', isCorrect: false, feedback: 'Teslim süresi alıcının planı için önemlidir.' },
+          { id: 'b', text: 'Boşverin söylemeyin', isCorrect: false, feedback: 'Bilgi almak senin hakkın ve önemli.' },
+          { id: 'c', text: 'Hemen ulaşsın, acelem var', isCorrect: false, feedback: 'Teslim süresi değiştiremezsin. Sabırla bekle.' },
+          { id: 'd', text: 'Teşekkür ederim, not alıyorum', isCorrect: true, feedback: 'Nazik bir şekilde bilgiye karşılık verdin.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step11'
+      },
+      {
+        id: 'step11',
+        question: 'Çıkışa doğru yürüyorsun. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1578873372346-1572f26fb9c4',
+        options: [
+          { id: 'a', text: 'Koşarak çıkarım', isCorrect: false, feedback: 'Sakin olmalısın.' },
+          { id: 'b', text: 'Kapıdan dikkatlice çıkarım', isCorrect: true, feedback: 'Dikkatli olmak önemli.' },
+          { id: 'c', text: 'Yerlere bakmam', isCorrect: false, feedback: 'Çevrene dikkat etmelisin.' },
+          { id: 'd', text: 'Yolumu şaşırırım', isCorrect: false, feedback: 'Yönünü bilmelisin.' }
+        ],
+        correctOptionId: 'b',
+        nextStepId: 'step12'
+      },
+      {
+        id: 'step12',
+        question: 'Postaneden çıktın. Şimdi ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1524678714210-9917a6c619c1',
+        options: [
+          { id: 'a', text: 'Teslimat sürecini takip ederim', isCorrect: true, feedback: 'Kargonun durumunu bilmek önemlidir.' },
+          { id: 'b', text: 'Hiç ilgilenmem', isCorrect: false, feedback: 'Takip etmek önemlidir.' },
+          { id: 'c', text: 'Unuturum', isCorrect: false, feedback: 'Bilgileri kaydetmelisin.' },
+          { id: 'd', text: 'Başkasına sorarım', isCorrect: false, feedback: 'Kendi kargonun sorumluluğu sende.' }
+        ],
+        correctOptionId: 'a'
+      }
+    ]
+  },
+
+  // Yeni Senaryo: Sinema Bileti Alma
+  {
+    id: 'cinema-ticket-purchase',
+    title: 'Sinema Bileti Alma',
+    description: 'Giședen bilet alma ve filme hazırlık',
+    difficulty: 'Zor',
+    icon: Calendar,
+    color: '#673AB7',
+    completed: false,
+    category: 'Toplum',
+    maxScore: 130,
+    steps: [
+      {
+        id: 'step1',
+        question: 'Sinema gișesine geldin. Görevli "Hoș geldiniz" dedi. Ne söylersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1596477602103-c6d3bbf4be5b',
+        options: [
+          { id: 'a', text: 'Ne var?', isCorrect: false, feedback: 'Nazik olmalısın.' },
+          { id: 'b', text: 'Bir bilet almak istiyorum', isCorrect: true, feedback: 'Doğrudan isteğini belirttin.' },
+          { id: 'c', text: 'Film yok mu?', isCorrect: false, feedback: 'Önce bilet isteğini söylemelisin.' },
+          { id: 'd', text: 'Konuşmam', isCorrect: false, feedback: 'İletişim kurmak önemlidir.' }
+        ],
+        correctOptionId: 'b',
+        nextStepId: 'step2'
+      },
+      {
+        id: 'step2',
+        question: 'Görevli "Hangi filme bilet istiyorsunuz?" diye soruyor. Ne dersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        options: [
+          { id: 'a', text: 'Avatar filmine', isCorrect: true, feedback: 'Hangi filmi izlemek istediğini belirttin.' },
+          { id: 'b', text: 'Bilmiyorum', isCorrect: false, feedback: 'Film seçmelisin.' },
+          { id: 'c', text: 'Farketmez', isCorrect: false, feedback: 'Bir film seçmelisin.' },
+          { id: 'd', text: 'Hiçbir şey söylemem', isCorrect: false, feedback: 'Cevap vermelisin.' }
+        ],
+        correctOptionId: 'a',
+        nextStepId: 'step3'
+      },
+      {
+        id: 'step3',
+        question: 'Görevli "Kaç kişilik bilet alacaksınız?" diyor. Ne dersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66',
+        options: [
+          { id: 'a', text: 'Bir kişilik', isCorrect: true, feedback: 'Kişi sayısını net belirttin.' },
+          { id: 'b', text: 'Bilmiyorum', isCorrect: false, feedback: 'Kişi sayısını belirtmelisin.' },
+          { id: 'c', text: 'Çok', isCorrect: false, feedback: 'Net sayı vermelisin.' },
+          { id: 'd', text: 'Hiçbir şey söylemem', isCorrect: false, feedback: 'Cevap vermelisin.' }
+        ],
+        correctOptionId: 'a',
+        nextStepId: 'step4'
+      },
+      {
+        id: 'step4',
+        question: 'Görevli hangi saat için bilet istediğini soruyor. Ne cevap verirsin?',
+        imageUrl: 'https://images.unsplash.com/photo-1570824109366-0f0aa488c925',
+        options: [
+          { id: 'a', text: 'Bilmiyorum, siz seçin', isCorrect: false, feedback: 'Tercihini senin yapman gerekiyor.' },
+          { id: 'b', text: 'Bugün değil, yarın', isCorrect: false, feedback: 'Bugünün saatleri sorulmuştu, günü değiştirme doğru değil.' },
+          { id: 'c', text: 'Gece 3.00 ', isCorrect: false, feedback: 'Bu saatte film olmaz.' },
+          { id: 'd', text: 'Saat 19:00 seansı için lütfen', isCorrect: true, feedback: 'Net bir şekilde saat belirttin, çok iyi.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step5'
+      },
+      {
+        id: 'step5',
+        question: 'Görevli, 3 boyutlu gözlük istersen ekstra ücret alınacağını söylüyor. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1603297631957-6f8ae5b6c2a9',
+        options: [
+          { id: 'a', text: 'Evet, gözlük almak istiyorum', isCorrect: true, feedback: 'Doğru, 3D film için gözlük gerekir.' },
+          { id: 'b', text: 'Hayır, gözlüğüm zaten var', isCorrect: true, feedback: 'Eğer gözlüğün varsa ekstra ödeme yapmana gerek yok.' },
+          { id: 'c', text: 'Ne gözlüğü, anlamadım', isCorrect: false, feedback: 'Film formatı hakkında bilgi almalısın.' },
+          { id: 'd', text: '3D filmi gözlüksüz izlerim', isCorrect: false, feedback: '3D film gözlüksüz sağlıklı şekilde izlenemez.' }
+        ],
+        correctOptionId: ['a', 'b'],
+        nextStepId: 'step6'
+      },
+      {
+        id: 'step6',
+        question: 'Bilet ücreti söylendi. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904',
+        options: [
+          { id: 'a', text: 'Nakit vereyim', isCorrect: true, feedback: 'Nakit ödeme de uygun.' },
+          { id: 'b', text: 'Param yok', isCorrect: false, feedback: 'Ödeme yapmalısın.' },
+          { id: 'c', text: 'Kartla ödeyeyim', isCorrect: true, feedback: 'Ödeme yöntemi belirttin.' },
+          { id: 'd', text: 'Hiçbir şey yapmam', isCorrect: false, feedback: 'Ödeme yapmalısın.' }
+        ],
+        correctOptionId: ['a', 'c'],
+        nextStepId: 'step7'
+      },
+      {
+        id: 'step7',
+        question: 'Ödeme sonrası görevli "Biletinizi alınız" diyor. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        options: [
+          { id: 'a', text: 'Bileti almam', isCorrect: false, feedback: 'Bileti mutlaka almalısın.' },
+          { id: 'b', text: 'Hiçbir şey söylemem', isCorrect: false, feedback: 'Nazik olmak iyi olur.' },
+          { id: 'c', text: 'Bileti yere atarım', isCorrect: false, feedback: 'Bileti saklamalısın.' },
+          { id: 'd', text: 'Teşekkür ederim', isCorrect: true, feedback: 'Nazikçe teşekkür ettin.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step8'
+      },
+      {
+        id: 'step8',
+        question: 'Filme girmeden önce kontrol var. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66',
+        options: [
+          { id: 'a', text: 'Bileti saklarım', isCorrect: false, feedback: 'Bileti göstermek gerekir.' },
+          { id: 'b', text: 'Hiçbir şey yapmam', isCorrect: false, feedback: 'Bilet kontrolü için biletini göstermelisin.' },
+          { id: 'c', text: 'Başkasının biletini gösteririm', isCorrect: false, feedback: 'Kendi biletini göstermelisin.' },
+          { id: 'd', text: 'Biletimi gösteririm', isCorrect: true, feedback: 'Doğru, biletini göstermelisin.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step9'
+      },
+      {
+        id: 'step9',
+        question: 'Salon girişinde görevli "İyi seyirler" diyor. Ne dersin?',
+        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        options: [
+          { id: 'a', text: 'Hiçbir şey söylemem', isCorrect: false, feedback: 'Nazik olmak iyi olur.' },
+          { id: 'b', text: 'Kızarım', isCorrect: false, feedback: 'Nazikçe karşılık vermelisin.' },
+          { id: 'c', text: 'Bileti atarım', isCorrect: false, feedback: 'Bileti saklamalısın.' },
+          { id: 'd', text: 'Teşekkür ederim', isCorrect: true, feedback: 'Nazikçe teşekkür ettin.' }
+        ],
+        correctOptionId: 'd',
+        nextStepId: 'step10'
+      },
+      {
+        id: 'step10',
+        question: 'Salonda yerini buldun. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66',
+        options: [
+          { id: 'a', text: 'Koltuk numarama otururum', isCorrect: true, feedback: 'Doğru koltuğa oturdun.' },
+          { id: 'b', text: 'Rastgele otururum', isCorrect: false, feedback: 'Kendi koltuğuna oturmalısın.' },
+          { id: 'c', text: 'Hiç oturmam', isCorrect: false, feedback: 'Film izlemek için oturmalısın.' },
+          { id: 'd', text: 'Başkasının yerine otururum', isCorrect: false, feedback: 'Kendi yerin önemli.' }
+        ],
+        correctOptionId: 'a',
+        nextStepId: 'step11'
+      },
+      {
+        id: 'step11',
+        question: 'Film başlamadan önce telefonun çalıyor. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904',
+        options: [
+          { id: 'a', text: 'Telefonu sessize alırım', isCorrect: true, feedback: 'Çevrendekileri rahatsız etmemek için doğru.' },
+          { id: 'b', text: 'Yüksek sesle konuşurum', isCorrect: false, feedback: 'Diğer izleyicileri rahatsız etmemelisin.' },
+          { id: 'c', text: 'Telefonu kapatmam', isCorrect: false, feedback: 'Sessize almak daha iyi.' },
+          { id: 'd', text: 'Bağırırım', isCorrect: false, feedback: 'Sessiz olmalısın.' }
+        ],
+        correctOptionId: 'a',
+        nextStepId: 'step12'
+      },
+      {
+        id: 'step12',
+        question: 'Film başladı. Yanındaki kişi yüksek sesle konuşuyor. Ne yaparsın?',
+        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        options: [
+          { id: 'a', text: 'Kavga çıkarırım', isCorrect: false, feedback: 'Nazikçe uyarmak yeterlidir.' },
+          { id: 'b', text: 'Hiçbir şey yapmam', isCorrect: false, feedback: 'Rahatsız oluyorsan nazikçe uyarabilirsin.' },
+          { id: 'c', text: 'Bağırırım', isCorrect: false, feedback: 'Sakin ve nazik olmak gerekir.' },
+          { id: 'd', text: 'Nazikçe sessiz olmasını isterim', isCorrect: true, feedback: 'Nazikçe uyarmak doğru.' }
+        ],
+        correctOptionId: 'd'
+      }
+    ]
   }
 ];
 

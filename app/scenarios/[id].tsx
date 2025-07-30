@@ -19,12 +19,8 @@ import {
   ArrowRight,
   ArrowLeft as ArrowLeftIcon,
   Trophy,
-<<<<<<< HEAD
-  Star
-=======
   Star,
   Clock
->>>>>>> integrate-master
 } from 'lucide-react-native';
 import { getScenarioById, calculateScore } from '@/data/scenarios';
 import { SimpleScenario, ScenarioStep } from '@/types';
@@ -221,42 +217,26 @@ export default function ScenarioPage() {
     );
   }
 
-<<<<<<< HEAD
-      return (
-      <LinearGradient
-              colors={['#FFFFFF', '#F8F9FA']}
+  return (
+    <LinearGradient
+      colors={['#FFFFFF', '#F8F9FA']}
       style={styles.container}
     >
-              <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <ArrowLeft size={24} color="#2C3E50" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{scenario.title}</Text>
-          <TouchableOpacity onPress={resetScenario} style={styles.resetButton}>
-            <RotateCcw size={20} color="#2C3E50" />
-          </TouchableOpacity>
-        </View>
-=======
-  return (
-    <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#FFFFFF" />
+          <ArrowLeft size={24} color="#2C3E50" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{scenario.title}</Text>
         <TouchableOpacity onPress={resetScenario} style={styles.resetButton}>
-          <RotateCcw size={20} color="#FFFFFF" />
+          <RotateCcw size={20} color="#2C3E50" />
         </TouchableOpacity>
       </View>
->>>>>>> integrate-master
 
       <ScrollView 
         style={styles.content} 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-<<<<<<< HEAD
         <View style={styles.progressContainer}>
           <Text style={styles.progressText}>
             Adım {currentStepIndex + 1} / {scenario.steps.length}
@@ -273,17 +253,6 @@ export default function ScenarioPage() {
         </View>
 
         <Animated.View style={[styles.questionContainer, { opacity: fadeAnim }]}>
-=======
-        {/* Progress Info */}
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressText}>
-            Soru {currentStepIndex + 1}/{scenario.steps.length}
-          </Text>
-        </View>
-
-        {/* Question Card */}
-        <Animated.View style={[styles.questionCard, { opacity: fadeAnim }]}>
->>>>>>> integrate-master
           {currentStep?.imageUrl && (
             <Image 
               source={{ uri: currentStep.imageUrl }} 
@@ -294,10 +263,6 @@ export default function ScenarioPage() {
           <Text style={styles.questionText}>{currentStep?.question}</Text>
         </Animated.View>
 
-<<<<<<< HEAD
-=======
-        {/* Options */}
->>>>>>> integrate-master
         <View style={styles.optionsContainer}>
           {currentStep?.options.map((option) => (
             <TouchableOpacity
@@ -311,7 +276,6 @@ export default function ScenarioPage() {
               onPress={() => handleOptionSelect(option.id)}
               disabled={selectedOption !== null}
             >
-<<<<<<< HEAD
               <Text style={[
                 styles.optionText,
                 selectedOption === option.id && styles.selectedOptionText,
@@ -321,20 +285,6 @@ export default function ScenarioPage() {
               {selectedOption === option.id && (
                 option.isCorrect ? (
                   <CheckCircle size={24} color="#4A90E2" />
-=======
-              <View style={styles.optionContent}>
-                <Text style={styles.optionLetter}>{option.id.toUpperCase()}</Text>
-                <Text style={[
-                  styles.optionText,
-                  selectedOption === option.id && styles.selectedOptionText,
-                ]}>
-                  {option.text}
-                </Text>
-              </View>
-              {selectedOption === option.id && (
-                option.isCorrect ? (
-                  <CheckCircle size={24} color="#4CAF50" />
->>>>>>> integrate-master
                 ) : (
                   <XCircle size={24} color="#E74C3C" />
                 )
@@ -343,43 +293,25 @@ export default function ScenarioPage() {
           ))}
         </View>
 
-<<<<<<< HEAD
         {showFeedback && (
           <Animated.View style={[styles.feedbackContainer, { opacity: fadeAnim }]}>
             <MessageCircle size={20} color={isCorrect ? "#4A90E2" : "#E74C3C"} />
             <Text style={[
               styles.feedbackText,
-                              { color: isCorrect ? "#4A90E2" : "#E74C3C" }
-=======
-        {/* Feedback */}
-        {showFeedback && (
-          <Animated.View style={[styles.feedbackContainer, { opacity: fadeAnim }]}>
-            <MessageCircle size={20} color={isCorrect ? "#4CAF50" : "#E74C3C"} />
-            <Text style={[
-              styles.feedbackText,
-              { color: isCorrect ? "#4CAF50" : "#E74C3C" }
->>>>>>> integrate-master
+              { color: isCorrect ? "#4A90E2" : "#E74C3C" }
             ]}>
               {feedbackMessage}
             </Text>
           </Animated.View>
         )}
 
-<<<<<<< HEAD
-=======
-        {/* Navigation */}
->>>>>>> integrate-master
         <View style={styles.navigationContainer}>
           {currentStep?.previousStepId && (
             <TouchableOpacity 
               style={styles.previousButton} 
               onPress={handlePrevious}
             >
-<<<<<<< HEAD
               <ArrowLeftIcon size={20} color="#4A90E2" />
-=======
-              <ArrowLeftIcon size={20} color="#FFFFFF" />
->>>>>>> integrate-master
               <Text style={styles.previousButtonText}>Önceki</Text>
             </TouchableOpacity>
           )}
@@ -389,48 +321,29 @@ export default function ScenarioPage() {
               style={[
                 styles.nextButton,
                 { 
-<<<<<<< HEAD
                   backgroundColor: isCorrect ? '#58CC02' : '#E74C3C',
                   borderColor: isCorrect ? '#58CC02' : '#E74C3C'
-=======
-                  backgroundColor: isCorrect ? '#4CAF50' : '#E74C3C',
->>>>>>> integrate-master
                 }
               ]} 
               onPress={handleNext}
             >
-<<<<<<< HEAD
               <View style={styles.nextButtonGradient}>
                 <Text style={styles.nextButtonText}>
                   {isCorrect ? 'Devam Et' : 'Tekrar Dene'}
                 </Text>
                 {isCorrect && <ArrowRight size={20} color="#FFFFFF" />}
               </View>
-=======
-              <Text style={styles.nextButtonText}>
-                {isCorrect ? 'Devam Et' : 'Tekrar Dene'}
-              </Text>
-              {isCorrect && <ArrowRight size={20} color="#FFFFFF" />}
->>>>>>> integrate-master
             </TouchableOpacity>
           )}
         </View>
       </ScrollView>
-<<<<<<< HEAD
     </LinearGradient>
-=======
-    </View>
->>>>>>> integrate-master
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-<<<<<<< HEAD
-=======
-    backgroundColor: '#1E293B', // Koyu arka plan
->>>>>>> integrate-master
   },
   header: {
     flexDirection: 'row',
@@ -439,24 +352,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-<<<<<<< HEAD
-=======
-    backgroundColor: '#1E293B',
->>>>>>> integrate-master
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-<<<<<<< HEAD
     fontSize: 18,
     fontWeight: 'bold',
     color: '#2C3E50',
-=======
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
->>>>>>> integrate-master
     flex: 1,
     textAlign: 'center',
   },
@@ -472,7 +375,6 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
   },
   progressContainer: {
-<<<<<<< HEAD
     marginBottom: 30,
   },
   progressText: {
@@ -501,26 +403,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-=======
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  progressText: {
-    fontSize: 16,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  questionCard: {
-    backgroundColor: '#334155',
-    padding: 24,
-    borderRadius: 16,
-    marginBottom: 24,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
->>>>>>> integrate-master
   },
   scenarioImage: {
     width: '100%',
@@ -529,19 +411,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   questionText: {
-<<<<<<< HEAD
     fontSize: 20,
     fontWeight: 'bold',
     color: '#2C3E50',
     textAlign: 'center',
     lineHeight: 28,
-=======
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    lineHeight: 26,
->>>>>>> integrate-master
   },
   optionsContainer: {
     gap: 12,
@@ -554,7 +428,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-<<<<<<< HEAD
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -576,42 +449,6 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: '#2C3E50',
-=======
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  optionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  optionLetter: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#64748B',
-    marginRight: 16,
-    width: 24,
-    textAlign: 'center',
-  },
-  selectedOption: {
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-  },
-  correctOption: {
-    borderColor: '#4CAF50',
-    backgroundColor: '#F0F9FF',
-  },
-  wrongOption: {
-    borderColor: '#E74C3C',
-    backgroundColor: '#FEF2F2',
-  },
-  optionText: {
-    fontSize: 16,
-    color: '#1E293B',
->>>>>>> integrate-master
     flex: 1,
   },
   selectedOptionText: {
@@ -625,19 +462,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
     gap: 12,
-<<<<<<< HEAD
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-=======
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
->>>>>>> integrate-master
   },
   feedbackText: {
     fontSize: 16,
@@ -653,7 +482,6 @@ const styles = StyleSheet.create({
   previousButton: {
     flexDirection: 'row',
     alignItems: 'center',
-<<<<<<< HEAD
     backgroundColor: '#FFFFFF',
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -664,16 +492,6 @@ const styles = StyleSheet.create({
   },
   previousButtonText: {
     color: '#4A90E2',
-=======
-    backgroundColor: '#64748B',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 8,
-  },
-  previousButtonText: {
-    color: '#FFFFFF',
->>>>>>> integrate-master
     fontSize: 16,
     fontWeight: '600',
   },
@@ -681,7 +499,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     flex: 1,
-<<<<<<< HEAD
     borderWidth: 1,
   },
   nextButtonGradient: {
@@ -692,14 +509,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
     justifyContent: 'center',
-=======
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    gap: 8,
->>>>>>> integrate-master
   },
   nextButtonText: {
     color: '#FFFFFF',
