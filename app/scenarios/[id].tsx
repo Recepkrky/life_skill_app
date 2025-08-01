@@ -123,8 +123,9 @@ export default function ScenarioPage() {
     if (option) {
       setIsCorrect(option.isCorrect);
       
+      // Feedback mesajını ayarla (doğru veya yanlış)
       if (option.isCorrect) {
-        setFeedbackMessage('Harika! Doğru cevap! 🎉');
+        setFeedbackMessage(option.feedback || 'Harika! Doğru cevap! 🎉');
       } else {
         setFeedbackMessage(option.feedback || 'Tekrar dene! 💪');
       }
@@ -154,7 +155,43 @@ export default function ScenarioPage() {
           saveStepProgress(nextIndex, newUserAnswers);
         }
       } else {
-        // Senaryo tamamlandı
+        // Senaryo tamamlandı - son adımın ilerleme verisini de kaydet
+        const finalStepIndex = scenario.steps.length - 1;
+        saveStepProgress(finalStepIndex, newUserAnswers);
+        
+        // Senaryo tamamlanma verisini direkt kaydet
+        if (user) {
+          const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+          const correctAnswers = calculateCorrectAnswers();
+          const score = calculateScore(scenario, correctAnswers);
+          
+          console.log('Senaryo tamamlanıyor:', {
+            userId: user.id,
+            scenarioId: id,
+            score,
+            correctAnswers,
+            totalSteps: scenario.steps.length,
+            timeSpent
+          });
+          
+          progressService.saveScenarioProgress(
+            user.id,
+            id as string,
+            score,
+            correctAnswers,
+            scenario.steps.length,
+            timeSpent
+          ).then((result) => {
+            console.log('Senaryo başarıyla tamamlandı:', result);
+            // Kullanıcı istatistiklerini güncelle
+            progressService.updateUserStats(user.id);
+            // Adım ilerlemesini sil
+            progressService.deleteStepProgress(user.id, id as string);
+          }).catch((error) => {
+            console.error('Senaryo tamamlama hatası:', error);
+          });
+        }
+        
         setScenarioCompleted(true);
       }
     } else {
@@ -243,8 +280,19 @@ export default function ScenarioPage() {
   const calculateCorrectAnswers = () => {
     let correct = 0;
     scenario.steps.forEach(step => {
-      if (userAnswers[step.id] === step.correctOptionId) {
-        correct++;
+      const userAnswer = userAnswers[step.id];
+      if (!userAnswer) return; // Kullanıcı cevap vermemişse atla
+      
+      // Birden fazla doğru seçenek varsa array kontrolü yap
+      if (Array.isArray(step.correctOptionId)) {
+        if (step.correctOptionId.includes(userAnswer)) {
+          correct++;
+        }
+      } else {
+        // Tek doğru seçenek varsa string karşılaştırması yap
+        if (userAnswer === step.correctOptionId) {
+          correct++;
+        }
       }
     });
     return correct;
@@ -254,28 +302,7 @@ export default function ScenarioPage() {
   const finalScore = scenarioCompleted ? calculateScore(scenario, calculateCorrectAnswers()) : 0;
   const totalCorrect = scenarioCompleted ? calculateCorrectAnswers() : 0;
 
-  // Senaryo tamamlandığında ilerlemeyi kaydet
-  useEffect(() => {
-    if (scenarioCompleted && user) {
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000); // saniye cinsinden
-      
-      progressService.saveScenarioProgress(
-        user.id,
-        id as string,
-        finalScore,
-        totalCorrect,
-        scenario.steps.length,
-        timeSpent
-      ).then(() => {
-        // Kullanıcı istatistiklerini güncelle
-        progressService.updateUserStats(user.id);
-        // Adım ilerlemesini sil
-        progressService.deleteStepProgress(user.id, id as string);
-      }).catch((error) => {
-        console.error('İlerleme kaydetme hatası:', error);
-      });
-    }
-  }, [scenarioCompleted, user, id, finalScore, totalCorrect, startTime]);
+
 
   if (!scenario) {
     return (
@@ -336,6 +363,55 @@ export default function ScenarioPage() {
               >
                 <RotateCcw size={20} color="#FFFFFF" />
                 <Text style={styles.resetButtonText}>Tekrar Oyna</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            {/* Ana Sayfaya Dön butonu */}
+            <TouchableOpacity 
+              style={[styles.resetButton, { marginTop: 16 }]} 
+              onPress={async () => {
+                                 // Senaryoyu %100 tamamlandı olarak işaretle
+                 if (user) {
+                   try {
+                     // Son adımın ilerleme verisini kaydet (eğer kaydedilmemişse)
+                     const finalStepIndex = scenario.steps.length - 1;
+                     await progressService.saveStepProgress(
+                       user.id,
+                       id as string,
+                       finalStepIndex,
+                       userAnswers
+                     );
+                    
+                    // Senaryo tamamlanma verisini kaydet
+                    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+                    await progressService.saveScenarioProgress(
+                      user.id,
+                      id as string,
+                      finalScore,
+                      totalCorrect,
+                      scenario.steps.length,
+                      timeSpent
+                    );
+                    
+                    // Kullanıcı istatistiklerini güncelle
+                    await progressService.updateUserStats(user.id);
+                    
+                    // Adım ilerlemesini sil
+                    await progressService.deleteStepProgress(user.id, id as string);
+                  } catch (error) {
+                    console.error('Senaryo tamamlama hatası:', error);
+                  }
+                }
+                
+                // Ana sayfaya dön
+                router.push('/');
+              }}
+            >
+              <LinearGradient
+                colors={['#4A90E2', '#357ABD']}
+                style={styles.resetButtonGradient}
+              >
+                <ArrowLeft size={20} color="#FFFFFF" />
+                <Text style={styles.resetButtonText}>Ana Sayfaya Dön</Text>
               </LinearGradient>
             </TouchableOpacity>
           </LinearGradient>

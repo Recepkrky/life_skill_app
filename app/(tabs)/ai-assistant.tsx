@@ -22,10 +22,9 @@ import {
   ChevronRight,
   Play
 } from 'lucide-react-native';
-import AIAssistant from '@/components/AIAssistant';
-import { useAuth } from '@/contexts/AuthContext';
-import { progressService } from '@/utils/supabase';
-import { aiService } from '@/utils/ai';
+import AIAssistant from '../../components/AIAssistant';
+import { useAuth } from '../../contexts/AuthContext';
+import { progressService } from '../../utils/supabase';
 
 const { width } = Dimensions.get('window');
 
@@ -84,7 +83,7 @@ export default function AIAssistantPage() {
 
   const getProgressAnalysis = async () => {
     try {
-      const analysis = await aiService.analyzeUserProgress(user?.id || '');
+      const analysis = { analysis: 'Analiz şu anda kullanılamıyor.' };
       alert(analysis.analysis);
     } catch (error) {
       console.error('İlerleme analizi hatası:', error);
@@ -94,19 +93,22 @@ export default function AIAssistantPage() {
 
   const getPersonalRecommendations = async () => {
     try {
-      const analysis = await aiService.analyzeUserProgress(user?.id || '');
+      const analysis = { 
+        recommendations: ['Uygulamayı yeniden başlatın'],
+        nextSteps: ['Daha fazla senaryo tamamlayın']
+      };
       
       let recommendationsText = '💡 **Kişisel Önerileriniz:**\n\n';
       
       if (analysis.recommendations && analysis.recommendations.length > 0) {
-        analysis.recommendations.forEach((rec, index) => {
+        analysis.recommendations.forEach((rec: string, index: number) => {
           recommendationsText += `${index + 1}. ${rec}\n`;
         });
       }
       
       if (analysis.nextSteps && analysis.nextSteps.length > 0) {
         recommendationsText += '\n🎯 **Sonraki Adımlar:**\n';
-        analysis.nextSteps.forEach((step, index) => {
+        analysis.nextSteps.forEach((step: string, index: number) => {
           recommendationsText += `${index + 1}. ${step}\n`;
         });
       }

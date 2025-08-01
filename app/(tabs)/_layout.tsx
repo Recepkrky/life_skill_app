@@ -3,8 +3,8 @@ import { Trophy, BookOpen, User, Settings, MessageCircle, LogOut } from 'lucide-
 import { useState } from 'react';
 import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
-import AIAssistant from '@/components/AIAssistant';
-import { useAuth } from '@/contexts/AuthContext';
+import AIAssistant from '../../components/AIAssistant';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function TabLayout() {
   const [showAI, setShowAI] = useState(false);

@@ -1,4 +1,4 @@
-import { ShoppingCart, Bus, CreditCard, Phone, Hospital, Briefcase, Coffee, Car, Users, Chrome as Home, Utensils, Shirt, BookOpen, Calendar, MapPin, Wifi, Camera, Music, Gamepad2, Heart, Pill, Train } from 'lucide-react-native';
+import { Bus, CreditCard, Phone, Hospital, Briefcase, Coffee, Car, Users, Chrome as Home, Utensils, Shirt, BookOpen, Calendar, MapPin, Wifi, Camera, Music, Gamepad2, Heart, Pill, Train } from 'lucide-react-native';
 
 export interface ScenarioStep {
   id: string;
@@ -31,133 +31,6 @@ export interface SimpleScenario {
 
 export const scenarios: SimpleScenario[] = [
   {
-    id: 'market-simple',
-    title: 'Market Alışverişi',
-    description: 'Kasiyerle konuşma ve ödeme yapma',
-    difficulty: 'Orta',
-    icon: ShoppingCart,
-    color: '#4A90E2',
-    completed: false,
-    category: 'Günlük',
-    maxScore: 70,
-            steps: [
-          {
-            id: 'step1',
-            question: 'Market kapısından girdin. Kasiyer sana "Merhaba" dedi. Sen ne dersin?',
-            imageUrl: 'https://setraf.com/content/images/upload/kapak/market-raf-sistemleri-nedir.jpg',
-            options: [
-              { id: 'a', text: 'Görüşürüz', isCorrect: false, feedback: '"Görüşürüz" ayrılırken söylenir. Şimdi selam vermen gerekir.' },
-              { id: 'b', text: 'Ne kadar?', isCorrect: false, feedback: 'Henüz ürün sormadın. Önce selam ver.' },
-              { id: 'c', text: 'Merhaba, nasılsınız?', isCorrect: true,  feedback: 'Harika, nazikçe selam verdin.' },
-              { id: 'd', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Selam vermek naziktir. Kasiyerle iletişime geç.' }
-            ],
-            correctOptionId: ['c'],
-            nextStepId: 'step2'
-          },
-      {
-        id: 'step2',
-        question: 'Kasiyer "Size nasıl yardımcı olabilirim?" diye sordu. Sen ne dersin?',
-        imageUrl: 'https://media.istockphoto.com/id/1482558833/photo/supermarket-worker-helping-customer-find-grocery-items.jpg',
-        options: [
-          { id: 'a', text: 'Yemek', isCorrect: false, feedback: 'Hangi ürünü istediğini belirtmelisin. Daha spesifik ol.' },
-          { id: 'b', text: 'Fiyatları söyle', isCorrect: false, feedback: 'Önce ne aradığını söyle, sonra fiyat sorabilirsin.' },
-          { id: 'c', text: 'Ekmek ve süt arıyorum', isCorrect: true, feedback: 'Net ve anlaşılır bir şekilde ifade ettin.' },
-          { id: 'd', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Kasiyere ne aradığını söylemelisin.' }
-        ],
-        correctOptionId: ['c'],
-        nextStepId: 'step3',
-        previousStepId: 'step1'
-      },
-      {
-        id: 'step3',
-        question: 'Kasiyer "Ekmek ve süt şu rafta" dedi. Sen ne dersin?',
-        imageUrl: 'https://media.istockphoto.com/id/1399985604/photo/grocery-store-shelves-with-bread.jpg',
-        options: [
-          { id: 'a', text: 'Tamam', isCorrect: false, feedback: 'Teşekkür etmek daha nazik olur.' },
-          { id: 'b', text: 'Teşekkür ederim', isCorrect: true, feedback: 'Nazik bir teşekkür ettin, çok iyi.' },
-          { id: 'c', text: 'Açım', isCorrect: false, feedback: 'Aç olduğunu kasiyere söyleme. Teşekkür edip raflara gidebilirsin.' },
-          { id: 'd', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Kısa da olsa teşekkür etmek önemli.' }
-        ],
-        correctOptionId: ['b'],
-        nextStepId: 'step4',
-        previousStepId: 'step2'
-      },
-      {
-        id: 'step4',
-        question: 'Ürünleri aldın ve kasaya geldin. Kasiyer "Kart mı nakit mi?" diye sordu. Sen ne dersin?',
-        imageUrl: 'https://media.istockphoto.com/id/1424626357/tr/fotoğraf/portrait-of-smiling-female-cashier.jpg?s=612x612&w=0&k=20&c=ds2YVliYY0oG9YFvQLqyrTXcnBmJX3khaSGvjyfYe_o=',
-        options: [
-          { id: 'a', text: 'Kart', isCorrect: true,  feedback: 'Kartla ödemeyi seçtin.' },
-          { id: 'b', text: 'Nakit', isCorrect: true, feedback: 'Nakit ödemeyi seçtin.' },
-          { id: 'c', text: 'Yemek', isCorrect: false, feedback: 'Bu bir ödeme yöntemi değil. Kart ya da nakit söylemelisin.' },
-          { id: 'd', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Ödeme yöntemini belirtmen gerekiyor.' }
-        ],
-        correctOptionId: ['a', 'b'],
-        // Dallanma: kart seçilirse step5_card, nakit seçilirse step5_cash
-        nextStepMap: {
-          a: 'step5_card',
-          b: 'step5_cash'
-        },
-        previousStepId: 'step3'
-      },
-      {
-        id: 'step5_card',
-        question: 'Kasiyer "Kartınızı okutun" dedi. Sen ne dersin/naparsın?',
-        imageUrl: 'https://media.istockphoto.com/id/1442172430/photo/contactless-payment-with-credit-card.jpg',
-        options: [
-          { id: 'a', text: 'Şifre girmem gerekiyor mu?', isCorrect: true,  feedback: 'Kartı okuttuktan sonra şifre sorabilirsin, uygun.' },
-          { id: 'b', text: 'Tamam', isCorrect: true, feedback: 'Talimatı kabul ettin, uygulanabilir.' },
-          { id: 'c', text: 'Nakit vereyim', isCorrect: false, feedback: 'Kart seçmiştin. Tutarlı olmalısın.' },
-          { id: 'd', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Kasiyere kısaca da olsa cevap vermek iyi olur.' }
-        ],
-        correctOptionId: ['a', 'b'],
-        nextStepId: 'step6',
-        previousStepId: 'step4'
-      },
-      {
-        id: 'step5_cash',
-        question: 'Kasiyer toplam tutarı söyledi. Ne yaparsın?',
-        imageUrl: 'https://media.istockphoto.com/id/1216958138/photo/hands-paying-with-cash-at-store.jpg',
-        options: [
-          { id: 'a', text: 'Parayı uzatır ve "Buyurun" dersin', isCorrect: true,  feedback: 'Doğru, nakit ödemede parayı uzatıp nazikçe verirsin.' },
-          { id: 'b', text: 'Kartımı okutayım', isCorrect: false, feedback: 'Nakit seçmiştin. Kartla ödeme söylemin tutarsız.' },
-          { id: 'c', text: 'Hiçbir şey söylemeden beklersin', isCorrect: false, feedback: 'Kasiyerin seni anlaması için parayı vermelisin.' },
-          { id: 'd', text: 'Üstü kalsın', isCorrect: false, feedback: 'Bu genelde restoranda bahşiş için söylenir, burada uygun değil.' }
-        ],
-        correctOptionId: ['a'],
-        nextStepId: 'step5b_cash_change',
-        previousStepId: 'step4'
-      },
-      {
-        id: 'step5b_cash_change',
-        question: 'Kasiyer para üstünü verdi ve "Buyurun" dedi. Sen ne dersin?',
-        imageUrl: 'https://media.istockphoto.com/id/1034194470/photo/female-cashier-giving-change-at-the-cash-register.jpg',
-        options: [
-          { id: 'a', text: 'Teşekkür ederim', isCorrect: true, feedback: 'Nazikçe teşekkür ettin, çok iyi.' },
-          { id: 'b', text: 'Para üstünü saymam', isCorrect: false, feedback: 'Para üstünü kısaca kontrol etmek iyi olur ama en azından teşekkür etmelisin.' },
-          { id: 'c', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Teşekkür etmek önemli bir sosyal beceridir.' },
-          { id: 'd', text: 'Para yetmedi mi?', isCorrect: false, feedback: 'Kasiyer sana para üstünü verdi, karışıklık yok.' }
-        ],
-        correctOptionId: ['a'],
-        nextStepId: 'step6',
-        previousStepId: 'step5_cash'
-      },
-      {
-        id: 'step6',
-        question: 'Ödeme tamamlandı. Kasiyer "İyi günler" dedi. Sen ne dersin?',
-        imageUrl: 'https://media.istockphoto.com/id/1424626357/tr/fotoğraf/portrait-of-smiling-female-cashier.jpg?s=612x612&w=0&k=20&c=ds2YVliYY0oG9YFvQLqyrTXcnBmJX3khaSGvjyfYe_o=',
-        options: [
-          { id: 'a', text: 'Hoşça kalın', isCorrect: true,  feedback: 'Nazik bir veda ifadesi kullandın.' },
-          { id: 'b', text: 'Görüşürüz', isCorrect: true, feedback: 'Veda için kullanılabilir, gayet uygun.' },
-          { id: 'c', text: 'Teşekkür ederim, iyi günler', isCorrect: true, feedback: 'Harika, teşekkür ve iyi dilek bir arada.' },
-          { id: 'd', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Veda etmek sosyal ilişkiler için önemlidir.' }
-        ],
-        correctOptionId: ['a', 'b', 'c'],
-        previousStepId: 'step5_card' // veya 'step5b_cash_change'; uygulamada son adım olduğu için kontrol gerekmeyebilir.
-      }
-    ]
-  },
-  {
     id: 'smartphone-basics',
     title: 'Akıllı Telefon Kullanımı',
     description: 'Temel telefon işlemleri ve uygulama kullanımı',
@@ -166,7 +39,7 @@ export const scenarios: SimpleScenario[] = [
     color: '#FF6B35',
     completed: false,
     category: 'Toplum',
-    maxScore: 40,
+    maxScore: 30,
     steps: [
       {
         id: 'step1',
@@ -174,7 +47,7 @@ export const scenarios: SimpleScenario[] = [
         imageUrl: 'https://images.pexels.com/photos/1647976/pexels-photo-1647976.jpeg?auto=compress&cs=tinysrgb&w=800',
         options: [
           { id: 'a', text: 'Hiçbir şey yapma', isCorrect: false, feedback: 'Telefonu kullanmak için bir uygulama açman gerek.' },
-          { id: 'b', text: 'Bir uygulama aç', isCorrect: true, feedback: 'Harika! Telefonu kullanmaya başladın.' },
+          { id: 'b', text: 'Mesaj uygulamasını aç', isCorrect: true, feedback: 'Harika! Telefonu kullanmaya başladın.' },
           { id: 'c', text: 'Telefonu kapat', isCorrect: false, feedback: 'Telefonu yeni açtın, kullanmaya başla.' },
           { id: 'd', text: 'Şifre gir', isCorrect: false, feedback: 'Zaten telefon açık. Uygulama kullanmaya başla.' }
         ],
@@ -219,7 +92,7 @@ export const scenarios: SimpleScenario[] = [
     color: '#4ECDC4',
     completed: false,
     category: 'Toplum',
-    maxScore: 70,
+    maxScore: 60,
     steps: [
       {
         id: 'step1',
@@ -314,7 +187,7 @@ export const scenarios: SimpleScenario[] = [
     color: '#7ED321',
     completed: false,
     category: 'Ulaşım',
-    maxScore: 40,
+    maxScore: 30,
     steps: [
       {
         id: 'step1',
@@ -335,7 +208,7 @@ export const scenarios: SimpleScenario[] = [
         imageUrl: 'https://isinolsun.com/blog/wp-content/uploads/2024/04/otobus-soforu-nasil.jpg',
         options: [
           { id: 'a', text: 'Evet',    isCorrect: false, feedback: '"Evet" yeterli değil. Nereye gideceğini söylemelisin.' },
-          { id: 'b', text: 'Merkez',  isCorrect: true,  feedback: 'Hedefini net söyledin.' },
+          { id: 'b', text: 'Merkeze gidiyorum',  isCorrect: true,  feedback: 'Hedefini net söyledin.' },
           { id: 'c', text: 'Otobüs',  isCorrect: false, feedback: 'Zaten otobüstesin. Gideceğin yeri söyle.' },
           { id: 'd', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Şoför nereye gideceğini bilmek istiyor.' }
         ],
@@ -362,12 +235,12 @@ export const scenarios: SimpleScenario[] = [
     id: 'doctor-visit',
     title: 'Doktor Ziyareti',
     description: 'Randevu alma ve muayene olma',
-    difficulty: 'Zor',
+    difficulty: 'Orta',
     icon: Hospital,
     color: '#E74C3C',
     completed: false,
     category: 'Sağlık',
-    maxScore: 110,
+    maxScore: 100,
     steps: [
       {
         id: 'step1',
@@ -627,7 +500,7 @@ export const scenarios: SimpleScenario[] = [
     color: '#2196F3',
     completed: false,
     category: 'Sağlık',
-    maxScore: 150,
+    maxScore: 140,
     steps: [
       {
         id: 'ecz-1',
@@ -737,65 +610,35 @@ export const scenarios: SimpleScenario[] = [
           { id: 'd', text: 'Nakit ödeyeceğim',    isCorrect: true,  feedback: 'Nakit ödemeyi seçtin.' }
         ],
         correctOptionId: ['c', 'd'],
-        nextStepMap: {
-          a: 'ecz-9_card',
-          b: 'ecz-9_cash'
-        },
+        nextStepId: 'ecz-9_payment',
         previousStepId: 'ecz-7'
       },
       {
-        id: 'ecz-9_card',
-        question: 'POS cihazı kartı okumanı istiyor. Ne yaparsın?',
+        id: 'ecz-9_payment',
+        question: 'Ödeme yapıyorsun. Eczacı "Kartınızı okutun veya parayı verin" dedi. Ne yaparsın?',
         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_dclpcf6s33MgMlubcwcPuMi31GlIj5CpKA&s',
         options: [
-          { id: 'a', text: 'Kartı cebime saklarım',       isCorrect: false, feedback: 'Ödeme için kartı kullanmalısın.' },
-          { id: 'b', text: 'Kartımı cihaza dokundururum', isCorrect: true,  feedback: 'Ödemeyi başlattın.' },
-          { id: 'c', text: 'Kartı kasiyere atarım',       isCorrect: false, feedback: 'Nazikçe kartını okutmalısın.' },
-          { id: 'd', text: 'Hiçbir şey yapmam',           isCorrect: false, feedback: 'Ödeme tamamlanmaz, hareket etmelisin.' }
+          { id: 'a', text: 'Kartımı okuturum', isCorrect: true,  feedback: 'Kartla ödeme yapıyorsun.' },
+          { id: 'b', text: 'Parayı uzatırım', isCorrect: true, feedback: 'Nakit ödeme yapıyorsun.' },
+          { id: 'c', text: 'Hiçbir şey yapmam', isCorrect: false, feedback: 'Ödeme yapmalısın.' },
+          { id: 'd', text: 'İlacı geri veririm', isCorrect: false, feedback: 'İlacı almak için ödeme yapmalısın.' }
         ],
-        correctOptionId: ['b'],
-        nextStepId: 'ecz-10_pin'
+        correctOptionId: ['a', 'b'],
+        nextStepId: 'ecz-10_completion'
       },
       {
-        id: 'ecz-10_pin',
-        question: 'Şifre istendi. Ne yaparsın?',
+        id: 'ecz-10_completion',
+        question: 'Ödeme tamamlandı. Eczacı "Teşekkür ederim" dedi. Ne dersin?',
         imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_dclpcf6s33MgMlubcwcPuMi31GlIj5CpKA&s',
         options: [
-          { id: 'a', text: 'Şifreyi yüksek sesle söylerim', isCorrect: false, feedback: 'Şifren gizli kalmalı, sadece tuşla.' },
-          { id: 'b', text: 'Şifreyi yanlış girerim',     isCorrect: false, feedback: 'Doğru şifreyi girmelisin.' },
-          { id: 'c', text: 'Şifremi girerim',            isCorrect: true,  feedback: 'Şifreni gizli şekilde girdin.' },
-          { id: 'd', text: 'Kartı çıkarırım',            isCorrect: false, feedback: 'İşlem bitmeden kartı çıkarmamalısın.' }
+          { id: 'a', text: 'Rica ederim', isCorrect: true,  feedback: 'Nazikçe karşılık verdin.' },
+          { id: 'b', text: 'Hiçbir şey söyleme', isCorrect: false, feedback: 'Teşekkür etmek iyi olur.' },
+          { id: 'c', text: 'İlacı geri ver', isCorrect: false, feedback: 'İlacı almışsın, geri verme.' },
+          { id: 'd', text: 'Para üstünü saymam', isCorrect: false, feedback: 'Ödeme tamamlandı, teşekkür etmek yeterli.' }
         ],
-        correctOptionId: ['c'],
+        correctOptionId: ['a'],
         nextStepId: 'ecz-11_receipt',
-        previousStepId: 'ecz-9_card'
-      },
-      {
-        id: 'ecz-9_cash',
-        question: 'Eczacı toplam tutarı söyledi. Ne yaparsın?',
-        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_dclpcf6s33MgMlubcwcPuMi31GlIj5CpKA&s',
-        options: [
-          { id: 'a', text: 'Kartımı okutayım',                 isCorrect: false, feedback: 'Nakit seçmiştin, tutarlı olmalısın.' },
-          { id: 'b', text: 'Hiçbir şey söylemeden beklerim',    isCorrect: false, feedback: 'Kasiyerin anlaması için parayı vermelisin.' },
-          { id: 'c', text: 'Üstü kalsın',                      isCorrect: false, feedback: 'Bu durumda uygun değil.' },
-          { id: 'd', text: 'Parayı uzatır ve "Buyurun" derim', isCorrect: true,  feedback: 'Doğru, parayı verirsin.' }
-        ],
-        correctOptionId: ['d'],
-        nextStepId: 'ecz-9b_cash_change',
-        previousStepId: 'ecz-8'
-      },
-      {
-        id: 'ecz-9b_cash_change',
-        question: 'Eczacı para üstünü verdi ve "Buyurun" dedi. Ne dersin?',
-        imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_dclpcf6s33MgMlubcwcPuMi31GlIj5CpKA&s',
-        options: [
-          { id: 'a', text: 'Para üstünü saymam',     isCorrect: false, feedback: 'Kısaca kontrol etmek iyi olur ama teşekkür etmeyi unutma.' },
-          { id: 'b', text: 'Teşekkür ederim',        isCorrect: true,  feedback: 'Nazikçe teşekkür ettin.' },
-          { id: 'c', text: 'Hiçbir şey söyleme',     isCorrect: false, feedback: 'Teşekkür etmek önemli bir sosyal beceridir.' },
-          { id: 'd', text: 'Para yetmedi mi?',       isCorrect: false, feedback: 'Kasiyer sana para üstünü verdi, karışıklık yok.' }
-        ],
-        correctOptionId: ['b'],
-        nextStepId: 'ecz-11_receipt'
+        previousStepId: 'ecz-9_payment'
       },
       {
         id: 'ecz-11_receipt',
@@ -1204,7 +1047,7 @@ export const scenarios: SimpleScenario[] = [
     id: 'post-office-shipment',
     title: 'Postaneden Kargo Gönderme',
     description: 'Görevliyle iletişim kurarak kargo gönderimi yapmak',
-    difficulty: 'Zor',
+    difficulty: 'Orta',
     icon: Briefcase,
     color: '#FF9800',
     completed: false,
@@ -1374,7 +1217,7 @@ export const scenarios: SimpleScenario[] = [
     id: 'cinema-ticket-purchase',
     title: 'Sinema Bileti Alma',
     description: 'Giședen bilet alma ve filme hazırlık',
-    difficulty: 'Zor',
+    difficulty: 'Orta',
     icon: Calendar,
     color: '#673AB7',
     completed: false,

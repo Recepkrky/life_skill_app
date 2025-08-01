@@ -22,10 +22,11 @@ import {
   Heart,
   Gamepad2
 } from 'lucide-react-native';
-import { scenarios, getScenariosByCategory } from '@/data/scenarios';
+import { scenarios, getScenariosByCategory } from '../../data/scenarios';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '@/contexts/AuthContext';
-import { progressService } from '@/utils/supabase';
+import { useAuth } from '../../contexts/AuthContext';
+import { progressService } from '../../utils/supabase';
+import { useFocusEffect } from 'expo-router';
 
 const categories = [
   { id: 'all', name: 'Tümü', icon: Filter, color: '#4A90E2' },
@@ -64,20 +65,78 @@ export default function ScenariosPage() {
     }
   };
 
-  const getScenarioProgress = (scenarioId: string) => {
-    const progress = userProgress.find(p => p.scenario_id === scenarioId);
-    if (progress) {
-      return 100; // Tamamlanmış
+  const [scenarioProgress, setScenarioProgress] = useState<{[key: string]: number}>({});
+  const [scenarioStatuses, setScenarioStatuses] = useState<{[key: string]: string}>({});
+
+  // Senaryo ilerlemelerini ve durumlarını yükle
+  const loadScenarioData = async () => {
+    if (!user?.id) return;
+    
+    const progressData: {[key: string]: number} = {};
+    const statusData: {[key: string]: string} = {};
+    
+    for (const scenario of scenarios) {
+      try {
+        const percentage = await progressService.getScenarioProgressPercentage(user.id, scenario.id);
+        const status = await progressService.getScenarioStatus(user.id, scenario.id);
+        progressData[scenario.id] = percentage;
+        statusData[scenario.id] = status;
+      } catch (error) {
+        console.error(`Senaryo ${scenario.id} veri yükleme hatası:`, error);
+        progressData[scenario.id] = 0;
+        statusData[scenario.id] = 'not-started';
+      }
     }
-    return 0; // Henüz başlanmamış
+    setScenarioProgress(progressData);
+    setScenarioStatuses(statusData);
   };
 
-  const filteredScenarios = scenarios.filter(scenario => {
-    const matchesCategory = selectedCategory === 'all' || scenario.category === selectedCategory;
-    const matchesSearch = scenario.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         scenario.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  useEffect(() => {
+    loadScenarioData();
+  }, [user]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        loadScenarioData();
+      }
+    }, [user])
+  );
+
+  const getScenarioProgress = (scenarioId: string) => {
+    return scenarioProgress[scenarioId] || 0;
+  };
+
+  const getScenarioStatus = (scenarioId: string) => {
+    return scenarioStatuses[scenarioId] || 'not-started';
+  };
+
+  // Senaryoları zorluk seviyesine göre gruplandır ve sırala
+  const getGroupedAndSortedScenarios = () => {
+    // Önce filtrele
+    const filtered = scenarios.filter(scenario => {
+      const matchesCategory = selectedCategory === 'all' || scenario.category === selectedCategory;
+      const matchesSearch = scenario.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           scenario.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+
+    // Zorluk seviyelerine göre gruplandır
+    const grouped: { [key: string]: any[] } = {
+      'Kolay': filtered.filter(s => s.difficulty === 'Kolay'),
+      'Orta': filtered.filter(s => s.difficulty === 'Orta'),
+      'Zor': filtered.filter(s => s.difficulty === 'Zor'),
+    };
+
+    // Her grup içinde adım sayısına göre sırala
+    Object.keys(grouped).forEach(difficulty => {
+      grouped[difficulty].sort((a: any, b: any) => a.steps.length - b.steps.length);
+    });
+
+    return grouped;
+  };
+
+  const groupedScenarios = getGroupedAndSortedScenarios();
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -163,69 +222,88 @@ export default function ScenariosPage() {
         contentContainerStyle={styles.scenariosContent}
         showsVerticalScrollIndicator={false}
       >
-        {filteredScenarios.map((scenario) => (
-          <TouchableOpacity
-            key={scenario.id}
-            style={styles.scenarioCard}
-            onPress={() => router.push(`/scenarios/${scenario.id}`)}
-          >
-            <LinearGradient
-              colors={['#FFFFFF', '#F8F9FA']}
-              style={styles.scenarioGradient}
-            >
-              <View style={[styles.scenarioIconContainer, { backgroundColor: scenario.color }]}>
-                <scenario.icon size={28} color="#FFFFFF" strokeWidth={2} />
+        {Object.entries(groupedScenarios).map(([difficulty, scenarios]) => (
+          scenarios.length > 0 && (
+            <View key={difficulty} style={styles.difficultySection}>
+              <View style={styles.difficultyHeader}>
+                <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(difficulty) }]}>
+                  <Text style={styles.difficultyBadgeText}>{difficulty}</Text>
+                </View>
+                <Text style={styles.difficultyCount}>{scenarios.length} senaryo</Text>
               </View>
               
-              <View style={styles.scenarioContent}>
-                <View style={styles.scenarioHeader}>
-                  <Text style={styles.scenarioTitle}>{scenario.title}</Text>
-                  {getScenarioProgress(scenario.id) === 100 && (
-                    <View style={styles.completedBadge}>
-                      <Trophy size={12} color="#FFFFFF" strokeWidth={2} fill="#FFFFFF" />
+              {scenarios.map((scenario) => (
+                <TouchableOpacity
+                  key={scenario.id}
+                  style={styles.scenarioCard}
+                  onPress={() => router.push(`/scenarios/${scenario.id}`)}
+                >
+                  <LinearGradient
+                    colors={['#FFFFFF', '#F8F9FA']}
+                    style={styles.scenarioGradient}
+                  >
+                    <View style={[styles.scenarioIconContainer, { backgroundColor: scenario.color }]}>
+                      <scenario.icon size={28} color="#FFFFFF" strokeWidth={2} />
                     </View>
-                  )}
-                </View>
-                
-                <Text style={styles.scenarioDescription}>
-                  {scenario.description}
-                </Text>
-                
-                <View style={styles.scenarioMeta}>
-                  <View style={styles.metaItem}>
-                    <Text style={[
-                      styles.difficultyText,
-                      { color: getDifficultyColor(scenario.difficulty) }
-                    ]}>
-                      {scenario.difficulty}
-                    </Text>
-                  </View>
-                  <View style={styles.metaItem}>
-                    <Text style={styles.durationText}>{scenario.steps.length} adım</Text>
-                  </View>
-                  <View style={styles.metaItem}>
-                    <Text style={styles.categoryText}>{scenario.category}</Text>
-                  </View>
-                </View>
-                
-                {/* Progress Bar */}
-                <View style={styles.progressContainer}>
-                  <View style={styles.progressBar}>
-                    <LinearGradient
-                      colors={getScenarioProgress(scenario.id) === 100 ? ['#4A90E2', '#357ABD'] : ['#E9ECEF', '#E9ECEF']}
-                      style={[
-                        styles.progressFill,
-                        { width: `${getScenarioProgress(scenario.id)}%` }
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.progressText}>
-                    {getScenarioProgress(scenario.id) === 100 ? 'Tamamlandı' : 'Henüz başlanmadı'}
-                  </Text>
-                </View>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
+                    
+                    <View style={styles.scenarioContent}>
+                      <View style={styles.scenarioHeader}>
+                        <Text style={styles.scenarioTitle}>{scenario.title}</Text>
+                        {getScenarioProgress(scenario.id) === 100 && (
+                          <View style={styles.completedBadge}>
+                            <Trophy size={12} color="#FFFFFF" strokeWidth={2} fill="#FFFFFF" />
+                          </View>
+                        )}
+                      </View>
+                      
+                      <Text style={styles.scenarioDescription}>
+                        {scenario.description}
+                      </Text>
+                      
+                      <View style={styles.scenarioMeta}>
+                        <View style={styles.metaItem}>
+                          <Text style={[
+                            styles.difficultyText,
+                            { color: getDifficultyColor(scenario.difficulty) }
+                          ]}>
+                            {scenario.difficulty}
+                          </Text>
+                        </View>
+                        <View style={styles.metaItem}>
+                          <Text style={styles.durationText}>{scenario.steps.length} adım</Text>
+                        </View>
+                        <View style={styles.metaItem}>
+                          <Text style={styles.categoryText}>{scenario.category}</Text>
+                        </View>
+                      </View>
+                      
+                      {/* Progress Bar */}
+                      <View style={styles.progressContainer}>
+                        <View style={styles.progressBar}>
+                          <LinearGradient
+                            colors={
+                              getScenarioProgress(scenario.id) === 100 ? ['#58CC02', '#4CAF50'] : 
+                              getScenarioProgress(scenario.id) > 0 ? ['#FFB800', '#FF9800'] : 
+                              ['#E9ECEF', '#E9ECEF']
+                            }
+                            style={[
+                              styles.progressFill,
+                              { width: `${getScenarioProgress(scenario.id)}%` }
+                            ]}
+                          />
+                        </View>
+                        <Text style={styles.progressText}>
+                          {getScenarioProgress(scenario.id) === 100 ? 'Tamamlandı' : 
+                           getScenarioProgress(scenario.id) > 0 ? `${getScenarioProgress(scenario.id)}% tamamlandı` : 
+                           'Henüz başlanmadı'}
+                        </Text>
+                      </View>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )
         ))}
       </ScrollView>
     </View>
@@ -420,6 +498,31 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
+    color: '#6C757D',
+    fontWeight: '500',
+  },
+  difficultySection: {
+    marginBottom: 24,
+  },
+  difficultyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  difficultyBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  difficultyBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  difficultyCount: {
+    fontSize: 14,
     color: '#6C757D',
     fontWeight: '500',
   },

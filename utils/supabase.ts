@@ -182,23 +182,53 @@ export const progressService = {
     totalQuestions: number,
     timeSpent: number
   ) {
-    const { data, error } = await supabase
+    // Önce mevcut kayıt var mı kontrol et
+    const { data: existingProgress } = await supabase
       .from('user_progress')
-      .insert({
-        user_id: userId,
-        scenario_id: scenarioId,
-        completed: true,
-        score,
-        correct_answers: correctAnswers,
-        total_questions: totalQuestions,
-        time_spent: timeSpent,
-        completed_at: new Date().toISOString(),
-      })
-      .select()
+      .select('*')
+      .eq('user_id', userId)
+      .eq('scenario_id', scenarioId)
       .single();
 
-    if (error) throw error;
-    return data;
+    if (existingProgress) {
+      // Mevcut kaydı güncelle
+      const { data, error } = await supabase
+        .from('user_progress')
+        .update({
+          completed: true,
+          score,
+          correct_answers: correctAnswers,
+          total_questions: totalQuestions,
+          time_spent: timeSpent,
+          completed_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+        .eq('scenario_id', scenarioId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } else {
+      // Yeni kayıt oluştur
+      const { data, error } = await supabase
+        .from('user_progress')
+        .insert({
+          user_id: userId,
+          scenario_id: scenarioId,
+          completed: true,
+          score,
+          correct_answers: correctAnswers,
+          total_questions: totalQuestions,
+          time_spent: timeSpent,
+          completed_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
   },
 
   // Kullanıcının senaryo ilerlemesini alma
@@ -215,6 +245,8 @@ export const progressService = {
 
   // Belirli bir senaryonun tamamlanma durumunu kontrol etme
   async getScenarioProgress(userId: string, scenarioId: string) {
+    console.log(`getScenarioProgress çağrıldı: ${scenarioId}`);
+    
     const { data, error } = await supabase
       .from('user_progress')
       .select('*')
@@ -222,8 +254,74 @@ export const progressService = {
       .eq('scenario_id', scenarioId)
       .single();
 
+    console.log(`getScenarioProgress sonucu - ${scenarioId}:`, { data, error });
+    
     if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
     return data;
+  },
+
+  // Senaryo ilerleme yüzdesini hesaplama
+  async getScenarioProgressPercentage(userId: string, scenarioId: string) {
+    try {
+      console.log(`getScenarioProgressPercentage başladı: ${scenarioId}`);
+      
+      // Önce user_progress tablosundan veri al (tamamlanmış senaryolar için)
+      const progressData = await this.getScenarioProgress(userId, scenarioId);
+      
+      console.log(`getScenarioProgressPercentage - ${scenarioId}:`, {
+        progressData,
+        completed: progressData?.completed
+      });
+      
+      if (progressData && progressData.completed) {
+        console.log(`${scenarioId} tamamlanmış, %100 döndürülüyor`);
+        return 100; // Tamamlanmış
+      }
+
+      // Adım ilerlemesini kontrol et (yarıda bırakılmış senaryolar için)
+      const stepProgress = await this.getStepProgress(userId, scenarioId);
+      
+      console.log(`getScenarioProgressPercentage - ${scenarioId} stepProgress:`, stepProgress);
+      
+      if (stepProgress) {
+        // Tamamlanan adım sayısını hesapla
+        // current_step_index 0'dan başlıyor, tamamlanan adım sayısı current_step_index
+        const completedSteps = stepProgress.current_step_index;
+        
+        // Senaryo toplam adım sayısını al
+        const scenarioStepCounts: { [key: string]: number } = {
+          'smartphone-basics': 3,
+          'library-visit': 6,
+          'bus-simple': 3,
+          'doctor-visit': 10,
+          'restoranda-siparis-verme': 7,
+          'eczane-ilac-alma': 14,
+          'tren-yolculugu-bilet-kontrolu': 24,
+          'post-office-shipment': 12,
+          'cinema-ticket-purchase': 12,
+        };
+
+        const totalSteps = scenarioStepCounts[scenarioId] || 10;
+        const percentage = Math.round((completedSteps / totalSteps) * 100);
+        
+        console.log(`${scenarioId} hesaplama:`, {
+          completedSteps,
+          totalSteps,
+          percentage
+        });
+        
+        // Eğer tüm adımlar tamamlandıysa %100 döndür, yoksa maksimum %99
+        if (completedSteps >= totalSteps) {
+          return 100;
+        }
+        return Math.min(percentage, 99);
+      }
+
+      return 0; // Hiç başlanmamış
+    } catch (error) {
+      console.error('İlerleme yüzdesi hesaplama hatası:', error);
+      return 0;
+    }
   },
 
   // Kullanıcı istatistiklerini güncelleme
@@ -305,6 +403,28 @@ export const progressService = {
 
     if (error && error.code !== 'PGRST116') throw error;
     return data;
+  },
+
+  // Senaryo durumunu belirleme
+  async getScenarioStatus(userId: string, scenarioId: string) {
+    try {
+      // Önce tamamlanmış senaryoları kontrol et
+      const progressData = await this.getScenarioProgress(userId, scenarioId);
+      if (progressData && progressData.completed) {
+        return 'completed';
+      }
+
+      // Adım ilerlemesini kontrol et
+      const stepProgress = await this.getStepProgress(userId, scenarioId);
+      if (stepProgress) {
+        return 'in-progress';
+      }
+
+      return 'not-started';
+    } catch (error) {
+      console.error('Senaryo durumu belirleme hatası:', error);
+      return 'not-started';
+    }
   },
 };
 

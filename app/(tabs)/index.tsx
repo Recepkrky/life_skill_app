@@ -22,10 +22,11 @@ import {
   Zap,
   Flame
 } from 'lucide-react-native';
-import { scenarios } from '@/data/scenarios';
+import { scenarios } from '../../data/scenarios';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '@/contexts/AuthContext';
-import { progressService } from '@/utils/supabase';
+import { useAuth } from '../../contexts/AuthContext';
+import { progressService } from '../../utils/supabase';
+import { useFocusEffect } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -34,17 +35,22 @@ export default function HomePage() {
   const [userStats, setUserStats] = useState<any>(null);
   const [userProgress, setUserProgress] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scenarioStatuses, setScenarioStatuses] = useState<{[key: string]: string}>({});
+  const [scenarioProgress, setScenarioProgress] = useState<{[key: string]: number}>({});
 
-  useEffect(() => {
-    if (user) {
-      loadUserData();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        loadUserData();
+        loadScenarioStatuses();
+        loadScenarioProgress();
+      }
+    }, [user])
+  );
 
   const loadUserData = async () => {
     try {
+      setLoading(true);
       const stats = await progressService.getUserStats(user?.id || '');
       setUserStats(stats);
       
@@ -60,12 +66,74 @@ export default function HomePage() {
     }
   };
 
-  const getScenarioProgress = (scenarioId: string) => {
-    const progress = userProgress.find(p => p.scenario_id === scenarioId);
-    if (progress) {
-      return 100; // Tamamlanmış
+  const loadScenarioStatuses = async () => {
+    if (!user?.id) return;
+    
+    const statusData: {[key: string]: string} = {};
+    for (const scenario of scenarios) {
+      try {
+        const status = await progressService.getScenarioStatus(user.id, scenario.id);
+        statusData[scenario.id] = status;
+      } catch (error) {
+        console.error(`Senaryo ${scenario.id} durum hatası:`, error);
+        statusData[scenario.id] = 'not-started';
+      }
     }
-    return 0; // Henüz başlanmamış
+    setScenarioStatuses(statusData);
+  };
+
+  const loadScenarioProgress = async () => {
+    if (!user?.id) return;
+    
+    console.log('loadScenarioProgress başladı');
+    
+    const progressData: {[key: string]: number} = {};
+    for (const scenario of scenarios) {
+      try {
+        console.log(`${scenario.id} için ilerleme hesaplanıyor...`);
+        const percentage = await progressService.getScenarioProgressPercentage(user.id, scenario.id);
+        console.log(`${scenario.id} ilerleme: ${percentage}%`);
+        progressData[scenario.id] = percentage;
+      } catch (error) {
+        console.error(`Senaryo ${scenario.id} ilerleme hatası:`, error);
+        progressData[scenario.id] = 0;
+      }
+    }
+    console.log('Tüm ilerleme verileri:', progressData);
+    setScenarioProgress(progressData);
+  };
+
+  const getScenarioProgress = async (scenarioId: string) => {
+    if (!user?.id) return 0;
+    
+    try {
+      const percentage = await progressService.getScenarioProgressPercentage(user.id, scenarioId);
+      return percentage;
+    } catch (error) {
+      console.error('İlerleme hesaplama hatası:', error);
+      return 0;
+    }
+  };
+
+  const getScenarioStatus = (scenarioId: string) => {
+    return scenarioStatuses[scenarioId] || 'not-started';
+  };
+
+  // Tarihi "2 saat önce" formatına çeviren fonksiyon
+  const getTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInMinutes < 1) return 'Az önce';
+    if (diffInMinutes < 60) return `${diffInMinutes} dakika önce`;
+    if (diffInHours < 24) return `${diffInHours} saat önce`;
+    if (diffInDays === 1) return 'Dün';
+    if (diffInDays < 7) return `${diffInDays} gün önce`;
+    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} hafta önce`;
+    return `${Math.floor(diffInDays / 30)} ay önce`;
   };
 
   const formatTime = (seconds: number) => {
@@ -74,13 +142,32 @@ export default function HomePage() {
     return `${hours}s ${minutes}dk`;
   };
 
-  const quickScenarios = scenarios.slice(0, 4).map(scenario => ({
+
+
+  // Senaryoları durumlarına göre sırala
+  const sortedScenarios = scenarios.map(scenario => ({
     id: scenario.id,
     title: scenario.title,
     icon: scenario.icon,
     color: scenario.color,
-    progress: getScenarioProgress(scenario.id),
-  }));
+    progress: scenarioProgress[scenario.id] || 0,
+    status: getScenarioStatus(scenario.id),
+  })).sort((a, b) => {
+    // Önce yarıda bırakılanlar (in-progress)
+    if (a.status === 'in-progress' && b.status !== 'in-progress') return -1;
+    if (b.status === 'in-progress' && a.status !== 'in-progress') return 1;
+    
+    // Sonra hiç başlanmayanlar (not-started) - tamamlananlar hariç
+    if (a.status === 'not-started' && b.status === 'completed') return -1;
+    if (b.status === 'not-started' && a.status === 'completed') return 1;
+    
+    return 0;
+  });
+
+  // Hızlı erişim için senaryoları filtrele (tamamlananları hariç tut)
+  const quickScenarios = sortedScenarios
+    .filter(scenario => scenario.status !== 'completed')
+    .slice(0, 4);
 
   const stats = [
     { 
@@ -183,40 +270,123 @@ export default function HomePage() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Hızlı Erişim</Text>
-          <Text style={styles.sectionSubtitle}>En sevdiğin senaryolar</Text>
+          <Text style={styles.sectionSubtitle}>Önce yarıda bıraktıkların, sonra yeni senaryolar</Text>
         </View>
-        <View style={styles.scenarioGrid}>
-          {quickScenarios.map((scenario) => (
-            <TouchableOpacity
-              key={scenario.id}
-              style={styles.scenarioCard}
-              onPress={() => router.push(`/scenarios/${scenario.id}`)}
-            >
-              <LinearGradient
-                colors={['#FFFFFF', '#F8F9FA']}
-                style={styles.scenarioGradient}
+        {loading ? (
+          <View style={styles.skeletonGrid}>
+            {[1, 2, 3, 4].map((_, index) => (
+              <View key={index} style={styles.skeletonCard}>
+                <View style={styles.skeletonIcon} />
+                <View style={styles.skeletonContent}>
+                  <View style={styles.skeletonTitle} />
+                  <View style={styles.skeletonProgress} />
+                  <View style={styles.skeletonBadge} />
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.scenarioGrid}>
+            {quickScenarios.map((scenario) => (
+              <TouchableOpacity
+                key={scenario.id}
+                style={styles.scenarioCard}
+                onPress={() => router.push(`/scenarios/${scenario.id}`)}
               >
-                <View style={[styles.scenarioIcon, { backgroundColor: scenario.color }]}>
-                  <scenario.icon size={32} color="#FFFFFF" strokeWidth={2} />
-                </View>
-                <View style={styles.scenarioContent}>
-                  <Text style={styles.scenarioTitle}>{scenario.title}</Text>
-                  <View style={styles.progressContainer}>
-                    <View style={styles.progressBar}>
-                      <LinearGradient
-                        colors={['#FFFFFF', '#F8F9FA']}
-                        style={[
-                          styles.progressFill, 
-                          { width: `${scenario.progress}%` }
-                        ]} 
-                      />
-                    </View>
-                    <Text style={styles.progressText}>{scenario.progress}%</Text>
+                <LinearGradient
+                  colors={['#FFFFFF', '#F8F9FA']}
+                  style={styles.scenarioGradient}
+                >
+                  <View style={[styles.scenarioIcon, { backgroundColor: scenario.color }]}>
+                    <scenario.icon size={32} color="#FFFFFF" strokeWidth={2} />
                   </View>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
+                  <View style={styles.scenarioContent}>
+                    <Text style={styles.scenarioTitle}>{scenario.title}</Text>
+                    <View style={styles.progressContainer}>
+                      <View style={styles.progressBar}>
+                        <LinearGradient
+                          colors={scenario.status === 'completed' ? ['#58CC02', '#4CAF50'] : 
+                                 scenario.status === 'in-progress' ? ['#FFB800', '#FF9800'] : 
+                                 ['#E9ECEF', '#DEE2E6']}
+                          style={[
+                            styles.progressFill, 
+                            { width: `${scenario.progress}%` }
+                          ]} 
+                        />
+                      </View>
+                      <Text style={styles.progressText}>
+                        {scenario.progress === 100 ? 'Tamamlandı' : 
+                         scenario.progress > 0 ? `${scenario.progress}%` : 
+                         'Henüz başlanmadı'}
+                      </Text>
+                    </View>
+                    {scenario.status === 'in-progress' && (
+                      <View style={styles.statusBadge}>
+                        <Text style={styles.statusBadgeText}>Devam Et</Text>
+                      </View>
+                    )}
+                    {scenario.status === 'not-started' && (
+                      <View style={[styles.statusBadge, { backgroundColor: '#E3F2FD' }]}>
+                        <Text style={[styles.statusBadgeText, { color: '#1976D2' }]}>Yeni</Text>
+                      </View>
+                    )}
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
+
+      {/* Son Tamamlanan Senaryolar */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Son Tamamlanan Senaryolar</Text>
+          <Text style={styles.sectionSubtitle}>Başarılarını kutluyoruz</Text>
+        </View>
+        <View style={styles.completedScenariosList}>
+          {userProgress
+            .filter(progress => progress.completed)
+            .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+            .slice(0, 2)
+            .map((progress) => {
+              const scenario = scenarios.find(s => s.id === progress.scenario_id);
+              if (!scenario) return null;
+              
+              const completedDate = new Date(progress.completed_at);
+              const timeAgo = getTimeAgo(completedDate);
+              
+              return (
+                <TouchableOpacity
+                  key={progress.id}
+                  style={styles.completedScenarioCard}
+                  onPress={() => router.push(`/scenarios/${scenario.id}`)}
+                >
+                  <LinearGradient
+                    colors={['#FFFFFF', '#F8F9FA']}
+                    style={styles.completedScenarioGradient}
+                  >
+                    <View style={[styles.completedScenarioIcon, { backgroundColor: scenario.color }]}>
+                      <scenario.icon size={24} color="#FFFFFF" strokeWidth={2} />
+                    </View>
+                    <View style={styles.completedScenarioContent}>
+                      <Text style={styles.completedScenarioTitle}>{scenario.title}</Text>
+                      <Text style={styles.completedScenarioScore}>Puan: {progress.score}/{scenario.maxScore}</Text>
+                      <Text style={styles.completedScenarioTime}>{timeAgo}</Text>
+                    </View>
+                    <View style={styles.completedScenarioBadge}>
+                      <Trophy size={16} color="#FFD93D" strokeWidth={2} fill="#FFD93D" />
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              );
+            })}
+          {userProgress.filter(progress => progress.completed).length === 0 && (
+            <View style={styles.emptyCompletedScenarios}>
+              <Text style={styles.emptyCompletedScenariosText}>Henüz senaryo tamamlamadın</Text>
+              <Text style={styles.emptyCompletedScenariosSubtext}>İlk senaryonu tamamla ve başarılarını kutlayalım!</Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -515,5 +685,126 @@ const styles = StyleSheet.create({
   },
   activityBadge: {
     marginLeft: 8,
+  },
+  statusBadge: {
+    backgroundColor: '#FFF3E0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#FF9800',
+  },
+  completedScenariosList: {
+    gap: 12,
+  },
+  completedScenarioCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  completedScenarioGradient: {
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+  },
+  completedScenarioIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  completedScenarioContent: {
+    flex: 1,
+  },
+  completedScenarioTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2C3E50',
+    marginBottom: 4,
+  },
+  completedScenarioScore: {
+    fontSize: 14,
+    color: '#6C757D',
+    marginBottom: 4,
+  },
+  completedScenarioTime: {
+    fontSize: 12,
+    color: '#6C757D',
+  },
+  completedScenarioBadge: {
+    marginLeft: 8,
+  },
+  emptyCompletedScenarios: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyCompletedScenariosText: {
+    fontSize: 16,
+    color: '#6C757D',
+    marginBottom: 8,
+  },
+  emptyCompletedScenariosSubtext: {
+    fontSize: 14,
+    color: '#95A5A6',
+    textAlign: 'center',
+  },
+  skeletonGrid: {
+    gap: 16,
+  },
+  skeletonCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E0E0E0',
+    borderRadius: 20,
+    padding: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  skeletonIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#B0BEC5',
+    marginRight: 16,
+  },
+  skeletonContent: {
+    flex: 1,
+  },
+  skeletonTitle: {
+    width: '80%',
+    height: 20,
+    backgroundColor: '#B0BEC5',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  skeletonProgress: {
+    width: '60%',
+    height: 6,
+    backgroundColor: '#B0BEC5',
+    borderRadius: 3,
+    marginBottom: 8,
+  },
+  skeletonBadge: {
+    width: 80,
+    height: 20,
+    backgroundColor: '#B0BEC5',
+    borderRadius: 10,
   },
 });

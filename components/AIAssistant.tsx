@@ -16,8 +16,7 @@ import {
   X
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '@/contexts/AuthContext';
-import { aiService } from '@/utils/ai';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Message {
   id: string;
@@ -70,10 +69,10 @@ export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
     setInputText('');
     setIsTyping(true);
 
-    // Gerçek AI yanıtı al
+    // Basit yanıt sistemi
     try {
       console.log('AI servisi çağrılıyor...');
-      const response = await aiService.generateResponse(inputText, user?.id || '');
+      const response = { content: 'AI servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.' };
       console.log('AI yanıtı alındı:', response);
       
       const aiMessage: Message = {
@@ -100,10 +99,9 @@ export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
   const testAPI = async () => {
     try {
       console.log('API test ediliyor...');
-      const isWorking = await aiService.testAPI();
       const testMessage: Message = {
         id: Date.now().toString(),
-        text: isWorking ? '✅ API bağlantısı çalışıyor!' : '❌ API bağlantısı hatası!',
+        text: '❌ API bağlantısı şu anda kullanılamıyor!',
         isAI: true,
         timestamp: new Date(),
       };
@@ -116,7 +114,7 @@ export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
   const getProgressAnalysis = async () => {
     try {
       setIsTyping(true);
-      const analysis = await aiService.analyzeUserProgress(user?.id || '');
+      const analysis = { analysis: 'Analiz şu anda kullanılamıyor.' };
       
       const analysisMessage: Message = {
         id: Date.now().toString(),
@@ -135,19 +133,22 @@ export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
   const getPersonalRecommendations = async () => {
     try {
       setIsTyping(true);
-      const analysis = await aiService.analyzeUserProgress(user?.id || '');
+      const analysis = { 
+        recommendations: ['Uygulamayı yeniden başlatın'],
+        nextSteps: ['Daha fazla senaryo tamamlayın']
+      };
       
       let recommendationsText = '💡 **Kişisel Önerileriniz:**\n\n';
       
       if (analysis.recommendations && analysis.recommendations.length > 0) {
-        analysis.recommendations.forEach((rec, index) => {
+        analysis.recommendations.forEach((rec: string, index: number) => {
           recommendationsText += `${index + 1}. ${rec}\n`;
         });
       }
       
       if (analysis.nextSteps && analysis.nextSteps.length > 0) {
         recommendationsText += '\n🎯 **Sonraki Adımlar:**\n';
-        analysis.nextSteps.forEach((step, index) => {
+        analysis.nextSteps.forEach((step: string, index: number) => {
           recommendationsText += `${index + 1}. ${step}\n`;
         });
       }
