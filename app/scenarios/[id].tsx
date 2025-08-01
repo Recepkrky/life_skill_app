@@ -40,6 +40,7 @@ export default function ScenarioPage() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{[key: string]: string}>({});
   const [startTime, setStartTime] = useState<number>(Date.now());
+  const [isLoading, setIsLoading] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const scenario = getScenarioById(id as string) as SimpleScenario;
@@ -47,13 +48,71 @@ export default function ScenarioPage() {
 
   useEffect(() => {
     if (scenario) {
+      // Mevcut ilerleme durumunu yükle
+      loadStepProgress();
+    }
+  }, [scenario, user]);
+
+  // İlerleme durumunu yükleme
+  const loadStepProgress = async () => {
+    if (!user || !scenario) return;
+
+    try {
+      const stepProgress = await progressService.getStepProgress(user.id, id as string);
+      
+      if (stepProgress) {
+        // Mevcut ilerleme varsa kullanıcıya sor
+        Alert.alert(
+          'Devam Et',
+          `Bu senaryoda ${stepProgress.current_step_index + 1}. adımdasın. Devam etmek istiyor musun?`,
+          [
+            {
+              text: 'Yeni Başla',
+              onPress: () => {
+                resetScenario();
+                setIsLoading(false);
+                Animated.timing(fadeAnim, {
+                  toValue: 1,
+                  duration: 800,
+                  useNativeDriver: true,
+                }).start();
+              },
+              style: 'destructive',
+            },
+            {
+              text: 'Devam Et',
+              onPress: () => {
+                setCurrentStepIndex(stepProgress.current_step_index);
+                setUserAnswers(stepProgress.user_answers || {});
+                setStartTime(new Date(stepProgress.start_time).getTime());
+                setIsLoading(false);
+                Animated.timing(fadeAnim, {
+                  toValue: 1,
+                  duration: 800,
+                  useNativeDriver: true,
+                }).start();
+              },
+            },
+          ]
+        );
+      } else {
+        setIsLoading(false);
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }).start();
+      }
+    } catch (error) {
+      console.error('İlerleme yükleme hatası:', error);
+      setIsLoading(false);
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 800,
         useNativeDriver: true,
       }).start();
     }
-  }, [scenario]);
+  };
 
   const handleOptionSelect = (optionId: string) => {
     if (!currentStep) return;
@@ -79,7 +138,8 @@ export default function ScenarioPage() {
 
     if (isCorrect) {
       // Doğru cevabı kaydet
-      setUserAnswers(prev => ({ ...prev, [currentStep.id]: selectedOption! }));
+      const newUserAnswers = { ...userAnswers, [currentStep.id]: selectedOption! };
+      setUserAnswers(newUserAnswers);
       
       // Doğru cevap - bir sonraki adıma geç
       if (currentStep.nextStepId) {
@@ -89,6 +149,9 @@ export default function ScenarioPage() {
           setSelectedOption(null);
           setShowFeedback(false);
           setIsCorrect(false);
+          
+          // İlerleme durumunu kaydet
+          saveStepProgress(nextIndex, newUserAnswers);
         }
       } else {
         // Senaryo tamamlandı
@@ -102,6 +165,45 @@ export default function ScenarioPage() {
     }
   };
 
+  // İlerleme durumunu kaydetme
+  const saveStepProgress = async (stepIndex: number, answers: {[key: string]: string}) => {
+    if (!user) return;
+
+    try {
+      await progressService.saveStepProgress(
+        user.id,
+        id as string,
+        stepIndex,
+        answers
+      );
+    } catch (error) {
+      console.error('İlerleme kaydetme hatası:', error);
+    }
+  };
+
+  // Geri butonuna basıldığında
+  const handleBackPress = () => {
+    // Eğer senaryo tamamlanmamışsa uyarı göster
+    if (!scenarioCompleted && Object.keys(userAnswers).length > 0) {
+      Alert.alert(
+        'Çıkış Yap',
+        'Senaryo henüz tamamlanmadı. İlerlemen kaydedilecek. Çıkmak istediğinden emin misin?',
+        [
+          {
+            text: 'İptal',
+            style: 'cancel',
+          },
+          {
+            text: 'Çık',
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    } else {
+      router.back();
+    }
+  };
+
   const handlePrevious = () => {
     if (currentStep?.previousStepId) {
       const previousIndex = scenario.steps.findIndex(step => step.id === currentStep.previousStepId);
@@ -110,11 +212,14 @@ export default function ScenarioPage() {
         setSelectedOption(null);
         setShowFeedback(false);
         setIsCorrect(false);
+        
+        // İlerleme durumunu kaydet
+        saveStepProgress(previousIndex, userAnswers);
       }
     }
   };
 
-  const resetScenario = () => {
+  const resetScenario = async () => {
     setCurrentStepIndex(0);
     setSelectedOption(null);
     setShowFeedback(false);
@@ -122,6 +227,16 @@ export default function ScenarioPage() {
     setScenarioCompleted(false);
     setCorrectAnswers(0);
     setUserAnswers({});
+    setStartTime(Date.now());
+
+    // İlerleme durumunu sıfırla
+    if (user) {
+      try {
+        await progressService.deleteStepProgress(user.id, id as string);
+      } catch (error) {
+        console.error('İlerleme sıfırlama hatası:', error);
+      }
+    }
   };
 
   // Doğru cevap sayısını hesapla
@@ -154,6 +269,8 @@ export default function ScenarioPage() {
       ).then(() => {
         // Kullanıcı istatistiklerini güncelle
         progressService.updateUserStats(user.id);
+        // Adım ilerlemesini sil
+        progressService.deleteStepProgress(user.id, id as string);
       }).catch((error) => {
         console.error('İlerleme kaydetme hatası:', error);
       });
@@ -164,6 +281,16 @@ export default function ScenarioPage() {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>Senaryo bulunamadı</Text>
+      </View>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Senaryo yükleniyor...</Text>
+        </View>
       </View>
     );
   }
@@ -202,7 +329,7 @@ export default function ScenarioPage() {
               </View>
             </View>
             
-            <TouchableOpacity style={styles.resetButton} onPress={resetScenario}>
+            <TouchableOpacity style={styles.resetButton} onPress={() => resetScenario()}>
               <LinearGradient
                 colors={['#FFD93D', '#FFB800']}
                 style={styles.resetButtonGradient}
@@ -223,11 +350,11 @@ export default function ScenarioPage() {
       style={styles.container}
     >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <ArrowLeft size={24} color="#2C3E50" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{scenario.title}</Text>
-        <TouchableOpacity onPress={resetScenario} style={styles.resetButton}>
+        <TouchableOpacity onPress={() => resetScenario()} style={styles.resetButton}>
           <RotateCcw size={20} color="#2C3E50" />
         </TouchableOpacity>
       </View>
@@ -595,5 +722,15 @@ const styles = StyleSheet.create({
     color: '#E74C3C',
     textAlign: 'center',
     marginTop: 100,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#6C757D',
+    textAlign: 'center',
   },
 });

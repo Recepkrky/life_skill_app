@@ -16,6 +16,20 @@ CREATE TABLE IF NOT EXISTS user_progress (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Senaryo adım ilerlemesi tablosu
+CREATE TABLE IF NOT EXISTS scenario_step_progress (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  scenario_id TEXT NOT NULL,
+  current_step_index INTEGER DEFAULT 0,
+  user_answers JSONB DEFAULT '{}', -- Kullanıcının verdiği cevaplar
+  start_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_activity TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, scenario_id)
+);
+
 -- Kullanıcı istatistikleri tablosu
 CREATE TABLE IF NOT EXISTS user_stats (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -65,48 +79,100 @@ CREATE TABLE IF NOT EXISTS user_badges (
 
 -- RLS (Row Level Security) politikaları
 ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE scenario_step_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_badges ENABLE ROW LEVEL SECURITY;
 
 -- Kullanıcılar sadece kendi verilerini görebilir
-CREATE POLICY "Users can view own progress" ON user_progress
-  FOR SELECT USING (auth.uid() = user_id);
+DO $$ 
+BEGIN
+  -- user_progress politikaları
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_progress' AND policyname = 'Users can view own progress') THEN
+    CREATE POLICY "Users can view own progress" ON user_progress
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can insert own progress" ON user_progress
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_progress' AND policyname = 'Users can insert own progress') THEN
+    CREATE POLICY "Users can insert own progress" ON user_progress
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can update own progress" ON user_progress
-  FOR UPDATE USING (auth.uid() = user_id);
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_progress' AND policyname = 'Users can update own progress') THEN
+    CREATE POLICY "Users can update own progress" ON user_progress
+      FOR UPDATE USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can view own stats" ON user_stats
-  FOR SELECT USING (auth.uid() = user_id);
+  -- scenario_step_progress politikaları
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scenario_step_progress' AND policyname = 'Users can view own step progress') THEN
+    CREATE POLICY "Users can view own step progress" ON scenario_step_progress
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can insert own stats" ON user_stats
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scenario_step_progress' AND policyname = 'Users can insert own step progress') THEN
+    CREATE POLICY "Users can insert own step progress" ON scenario_step_progress
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can update own stats" ON user_stats
-  FOR UPDATE USING (auth.uid() = user_id);
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scenario_step_progress' AND policyname = 'Users can update own step progress') THEN
+    CREATE POLICY "Users can update own step progress" ON scenario_step_progress
+      FOR UPDATE USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can view own badges" ON user_badges
-  FOR SELECT USING (auth.uid() = user_id);
+  -- user_stats politikaları
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_stats' AND policyname = 'Users can view own stats') THEN
+    CREATE POLICY "Users can view own stats" ON user_stats
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can insert own badges" ON user_badges
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_stats' AND policyname = 'Users can insert own stats') THEN
+    CREATE POLICY "Users can insert own stats" ON user_stats
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_stats' AND policyname = 'Users can update own stats') THEN
+    CREATE POLICY "Users can update own stats" ON user_stats
+      FOR UPDATE USING (auth.uid() = user_id);
+  END IF;
+
+  -- user_badges politikaları
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_badges' AND policyname = 'Users can view own badges') THEN
+    CREATE POLICY "Users can view own badges" ON user_badges
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'user_badges' AND policyname = 'Users can insert own badges') THEN
+    CREATE POLICY "Users can insert own badges" ON user_badges
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
+
+END $$;
 
 -- Senaryolar herkes tarafından görülebilir
 ALTER TABLE scenarios ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Scenarios are viewable by everyone" ON scenarios
-  FOR SELECT USING (true);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scenarios' AND policyname = 'Scenarios are viewable by everyone') THEN
+    CREATE POLICY "Scenarios are viewable by everyone" ON scenarios
+      FOR SELECT USING (true);
+  END IF;
+END $$;
 
 -- Kategoriler herkes tarafından görülebilir
 ALTER TABLE scenario_categories ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Categories are viewable by everyone" ON scenario_categories
-  FOR SELECT USING (true);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scenario_categories' AND policyname = 'Categories are viewable by everyone') THEN
+    CREATE POLICY "Categories are viewable by everyone" ON scenario_categories
+      FOR SELECT USING (true);
+  END IF;
+END $$;
 
 -- İndeksler
 CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_progress_scenario_id ON user_progress(scenario_id);
 CREATE INDEX IF NOT EXISTS idx_user_progress_completed_at ON user_progress(completed_at);
+CREATE INDEX IF NOT EXISTS idx_scenario_step_progress_user_id ON scenario_step_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_scenario_step_progress_scenario_id ON scenario_step_progress(scenario_id);
 CREATE INDEX IF NOT EXISTS idx_user_stats_user_id ON user_stats(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_badges_user_id ON user_badges(user_id);
 
@@ -120,17 +186,32 @@ END;
 $$ language 'plpgsql';
 
 -- Trigger'lar
-CREATE TRIGGER update_user_progress_updated_at 
-  BEFORE UPDATE ON user_progress 
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_user_progress_updated_at') THEN
+    CREATE TRIGGER update_user_progress_updated_at 
+      BEFORE UPDATE ON user_progress 
+      FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  END IF;
 
-CREATE TRIGGER update_user_stats_updated_at 
-  BEFORE UPDATE ON user_stats 
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_scenario_step_progress_updated_at') THEN
+    CREATE TRIGGER update_scenario_step_progress_updated_at 
+      BEFORE UPDATE ON scenario_step_progress 
+      FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  END IF;
 
-CREATE TRIGGER update_scenarios_updated_at 
-  BEFORE UPDATE ON scenarios 
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_user_stats_updated_at') THEN
+    CREATE TRIGGER update_user_stats_updated_at 
+      BEFORE UPDATE ON user_stats 
+      FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_scenarios_updated_at') THEN
+    CREATE TRIGGER update_scenarios_updated_at 
+      BEFORE UPDATE ON scenarios 
+      FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END $$;
 
 -- Örnek kategori verileri
 INSERT INTO scenario_categories (name, description, color, icon) VALUES

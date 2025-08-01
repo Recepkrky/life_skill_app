@@ -36,6 +36,18 @@ export interface UserProgress {
   created_at: string;
 }
 
+export interface ScenarioStepProgress {
+  id: string;
+  user_id: string;
+  scenario_id: string;
+  current_step_index: number;
+  user_answers: {[key: string]: string};
+  start_time: string;
+  last_activity: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface UserStats {
   id: string;
   user_id: string;
@@ -112,6 +124,55 @@ export const authService = {
 
 // Kullanıcı ilerleme fonksiyonları
 export const progressService = {
+  // Senaryo adım ilerlemesini kaydetme
+  async saveStepProgress(
+    userId: string,
+    scenarioId: string,
+    currentStepIndex: number,
+    userAnswers: {[key: string]: string}
+  ) {
+    const { data, error } = await supabase
+      .from('scenario_step_progress')
+      .upsert({
+        user_id: userId,
+        scenario_id: scenarioId,
+        current_step_index: currentStepIndex,
+        user_answers: userAnswers,
+        last_activity: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id,scenario_id'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Senaryo adım ilerlemesini alma
+  async getStepProgress(userId: string, scenarioId: string) {
+    const { data, error } = await supabase
+      .from('scenario_step_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('scenario_id', scenarioId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
+    return data;
+  },
+
+  // Senaryo adım ilerlemesini silme (senaryo tamamlandığında)
+  async deleteStepProgress(userId: string, scenarioId: string) {
+    const { error } = await supabase
+      .from('scenario_step_progress')
+      .delete()
+      .eq('user_id', userId)
+      .eq('scenario_id', scenarioId);
+
+    if (error) throw error;
+  },
+
   // Senaryo tamamlama kaydetme
   async saveScenarioProgress(
     userId: string,

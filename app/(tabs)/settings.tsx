@@ -14,7 +14,6 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function SettingsPage() {
   const { signOut } = useAuth();
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
 
@@ -58,14 +57,6 @@ export default function SettingsPage() {
           type: 'switch',
           value: voiceEnabled,
           onToggle: setVoiceEnabled,
-        },
-        {
-          icon: darkMode ? Moon : Sun,
-          title: 'Koyu Tema',
-          description: 'Göz yorgunluğunu azaltır',
-          type: 'switch',
-          value: darkMode,
-          onToggle: setDarkMode,
         },
       ],
     },

@@ -32,7 +32,7 @@ function RootLayoutContent() {
 
   return (
     <LinearGradient
-              colors={['#FFFFFF', '#F8F9FA']}
+      colors={['#FFFFFF', '#F8F9FA']}
       style={{ flex: 1 }}
     >
       <Stack 
