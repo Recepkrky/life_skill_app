@@ -85,21 +85,21 @@ export default function HomePage() {
   const loadScenarioProgress = async () => {
     if (!user?.id) return;
     
-    console.log('loadScenarioProgress başladı');
+    // console.log('loadScenarioProgress başladı');
     
     const progressData: {[key: string]: number} = {};
     for (const scenario of scenarios) {
       try {
-        console.log(`${scenario.id} için ilerleme hesaplanıyor...`);
+        // console.log(`${scenario.id} için ilerleme hesaplanıyor...`);
         const percentage = await progressService.getScenarioProgressPercentage(user.id, scenario.id);
-        console.log(`${scenario.id} ilerleme: ${percentage}%`);
+        // console.log(`${scenario.id} ilerleme: ${percentage}%`);
         progressData[scenario.id] = percentage;
       } catch (error) {
         console.error(`Senaryo ${scenario.id} ilerleme hatası:`, error);
         progressData[scenario.id] = 0;
       }
     }
-    console.log('Tüm ilerleme verileri:', progressData);
+    // console.log('Tüm ilerleme verileri:', progressData);
     setScenarioProgress(progressData);
   };
 
@@ -146,10 +146,12 @@ export default function HomePage() {
 
   // Senaryoları durumlarına göre sırala
   const sortedScenarios = scenarios.map(scenario => ({
+    ...scenario,
     id: scenario.id,
     title: scenario.title,
     icon: scenario.icon,
     color: scenario.color,
+    difficulty: scenario.difficulty,
     progress: scenarioProgress[scenario.id] || 0,
     status: getScenarioStatus(scenario.id),
   })).sort((a, b) => {
@@ -161,7 +163,15 @@ export default function HomePage() {
     if (a.status === 'not-started' && b.status === 'completed') return -1;
     if (b.status === 'not-started' && a.status === 'completed') return 1;
     
-    return 0;
+    // Aynı durumdaki senaryoları zorluk seviyesine göre sırala (Kolay -> Orta -> Zor)
+    const difficultyOrder = { 'Kolay': 1, 'Orta': 2, 'Zor': 3 };
+    const diffA = difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 4;
+    const diffB = difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 4;
+    
+    if (diffA !== diffB) return diffA - diffB;
+    
+    // Aynı zorluk seviyesindeki senaryoları adım sayısına göre sırala
+    return a.steps.length - b.steps.length;
   });
 
   // Hızlı erişim için senaryoları filtrele (tamamlananları hariç tut)
@@ -232,38 +242,38 @@ export default function HomePage() {
 
       {/* Today's Challenge */}
       <View style={styles.challengeCard}>
-        <ImageBackground
-          source={{ uri: 'https://images.pexels.com/photos/264547/pexels-photo-264547.jpeg?auto=compress&cs=tinysrgb&w=800' }}
-          style={styles.challengeBackground}
-          imageStyle={styles.challengeImage}
-        >
-          <LinearGradient
-            colors={['rgba(74, 144, 226, 0.9)', 'rgba(53, 122, 189, 0.8)']}
-            style={styles.challengeOverlay}
-          >
-            <View style={styles.challengeContent}>
-              <View style={styles.challengeBadge}>
-                <Text style={styles.challengeBadgeText}>GÜNLÜK GÖREV</Text>
-              </View>
-              <Text style={styles.challengeTitle}>Market Kasiyeri ile Konuşma</Text>
-              <Text style={styles.challengeDescription}>
-                Nazik ifadeler kullanarak kasiyerle güzel bir konuşma yap
+        <View style={[styles.challengeBackground, { backgroundColor: '#4DA8DA' }]}>
+          <View style={styles.challengeContent}>
+            <View style={styles.challengeBadge}>
+              <Text style={styles.challengeBadgeText}>
+                {quickScenarios[0]?.status === 'in-progress' ? 'DEVAM EDEN' : 'GÜNLÜK GÖREV'}
               </Text>
-              <TouchableOpacity 
-                style={styles.challengeButton}
-                onPress={() => router.push('/scenarios/market-simple')}
-              >
-                <LinearGradient
-                  colors={['#FFD93D', '#FFB800']}
-                  style={styles.challengeButtonGradient}
-                >
-                  <Text style={styles.challengeButtonText}>Başla</Text>
-                  <Trophy size={16} color="#FFFFFF" strokeWidth={2} />
-                </LinearGradient>
-              </TouchableOpacity>
             </View>
-          </LinearGradient>
-        </ImageBackground>
+            <Text style={styles.challengeTitle}>
+              {quickScenarios[0]?.title || 'Tüm senaryolar tamamlandı!'}
+            </Text>
+            <Text style={styles.challengeDescription}>
+              {quickScenarios[0] ? 
+                (quickScenarios[0].status === 'in-progress' ? 
+                  `Devam et: ${Math.round(quickScenarios[0].progress)}% tamamlandı` : 
+                  'Yeni bir beceri kazanmaya hazır mısın?') : 
+                'Tebrikler! Tüm senaryoları tamamladınız!'}
+            </Text>
+            <TouchableOpacity 
+              style={styles.challengeButton}
+              onPress={() => quickScenarios[0] && router.push(`/scenarios/${quickScenarios[0].id}`)}
+              disabled={!quickScenarios[0]}
+            >
+              <LinearGradient
+                colors={['#FFD93D', '#FFB800']}
+                style={styles.challengeButtonGradient}
+              >
+                <Text style={styles.challengeButtonText}>Başla</Text>
+                <Trophy size={16} color="#FFFFFF" strokeWidth={2} />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* Quick Access Scenarios */}
@@ -302,6 +312,26 @@ export default function HomePage() {
                   </View>
                   <View style={styles.scenarioContent}>
                     <Text style={styles.scenarioTitle}>{scenario.title}</Text>
+                    <View style={styles.difficultyContainer}>
+                      <View style={[
+                        styles.difficultyBadge,
+                        {
+                          backgroundColor: scenario.difficulty === 'Kolay' ? '#E8F5E8' :
+                                         scenario.difficulty === 'Orta' ? '#FFF3E0' : '#FFEBEE'
+                        }
+                      ]}>
+                        <Text style={[
+                          styles.difficultyText,
+                          {
+                            color: scenario.difficulty === 'Kolay' ? '#2E7D32' :
+                                   scenario.difficulty === 'Orta' ? '#F57C00' : '#C62828'
+                          }
+                        ]}>
+                          {scenario.difficulty}
+                        </Text>
+                      </View>
+                      <Text style={styles.stepCountText}>{scenario.steps.length} adım</Text>
+                    </View>
                     <View style={styles.progressContainer}>
                       <View style={styles.progressBar}>
                         <LinearGradient
@@ -390,37 +420,6 @@ export default function HomePage() {
         </View>
       </View>
 
-      {/* Recent Activity */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Son Aktiviteler</Text>
-          <Text style={styles.sectionSubtitle}>Başarılarını kutluyoruz</Text>
-        </View>
-        <View style={styles.activityList}>
-          <View style={styles.activityItem}>
-            <View style={[styles.activityIcon, { backgroundColor: '#58CC02' }]}>
-              <ShoppingCart size={20} color="#FFFFFF" strokeWidth={2} />
-            </View>
-            <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>Market Alışverişi Tamamlandı</Text>
-              <Text style={styles.activityTime}>2 saat önce</Text>
-            </View>
-            <View style={styles.activityBadge}>
-              <Trophy size={16} color="#FFD93D" strokeWidth={2} fill="#FFD93D" />
-            </View>
-          </View>
-          
-          <View style={styles.activityItem}>
-            <View style={[styles.activityIcon, { backgroundColor: '#4ECDC4' }]}>
-              <Bus size={20} color="#FFFFFF" strokeWidth={2} />
-            </View>
-            <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>Otobüs Yolculuğu Pratik</Text>
-              <Text style={styles.activityTime}>Dün</Text>
-            </View>
-          </View>
-        </View>
-      </View>
       <View style={{ height: 80 }} />
     </ScrollView>
   );
@@ -472,11 +471,11 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
     overflow: 'hidden',
-    elevation: 4,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
   },
   statGradient: {
     padding: 16,
@@ -496,19 +495,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   challengeCard: {
-    margin: 20,
-    borderRadius: 20,
+    marginTop: 18,
+    marginBottom: 28,
+    marginHorizontal: 16,
+    borderRadius: 28,
     overflow: 'hidden',
-    height: 170,
-    elevation: 8,
+    height: 320,
+    width: 'auto',
+    elevation: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    borderWidth: 2,
+    borderColor: '#B4C7F8',
+    backgroundColor: '#2E4B7E',
+    padding: 0,
   },
   challengeBackground: {
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: '#2E4B7E',
+    padding: 24,
   },
   challengeImage: {
     borderRadius: 25,
@@ -530,8 +538,10 @@ const styles = StyleSheet.create({
   },
   challengeBadgeText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 16,
     fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   challengeTitle: {
     fontSize: 20,
@@ -592,13 +602,14 @@ const styles = StyleSheet.create({
   scenarioCard: {
     borderRadius: 20,
     overflow: 'hidden',
-    elevation: 8,
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
     borderWidth: 1,
     borderColor: '#E9ECEF',
+    backgroundColor: '#FFFFFF',
   },
   scenarioGradient: {
     padding: 20,
@@ -705,13 +716,14 @@ const styles = StyleSheet.create({
   completedScenarioCard: {
     borderRadius: 20,
     overflow: 'hidden',
-    elevation: 8,
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
     borderWidth: 1,
     borderColor: '#E9ECEF',
+    backgroundColor: '#FFFFFF',
   },
   completedScenarioGradient: {
     padding: 20,
@@ -806,5 +818,26 @@ const styles = StyleSheet.create({
     height: 20,
     backgroundColor: '#B0BEC5',
     borderRadius: 10,
+  },
+  difficultyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  difficultyBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  difficultyText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  stepCountText: {
+    fontSize: 13,
+    color: '#6C757D',
+    fontWeight: '500',
   },
 });

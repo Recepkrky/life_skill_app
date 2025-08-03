@@ -245,7 +245,7 @@ export const progressService = {
 
   // Belirli bir senaryonun tamamlanma durumunu kontrol etme
   async getScenarioProgress(userId: string, scenarioId: string) {
-    console.log(`getScenarioProgress çağrıldı: ${scenarioId}`);
+    // console.log(`getScenarioProgress çağrıldı: ${scenarioId}`);
     
     const { data, error } = await supabase
       .from('user_progress')
@@ -254,7 +254,7 @@ export const progressService = {
       .eq('scenario_id', scenarioId)
       .single();
 
-    console.log(`getScenarioProgress sonucu - ${scenarioId}:`, { data, error });
+    // console.log(`getScenarioProgress sonucu - ${scenarioId}:`, { data, error });
     
     if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
     return data;
@@ -263,25 +263,25 @@ export const progressService = {
   // Senaryo ilerleme yüzdesini hesaplama
   async getScenarioProgressPercentage(userId: string, scenarioId: string) {
     try {
-      console.log(`getScenarioProgressPercentage başladı: ${scenarioId}`);
+      // console.log(`getScenarioProgressPercentage başladı: ${scenarioId}`);
       
       // Önce user_progress tablosundan veri al (tamamlanmış senaryolar için)
       const progressData = await this.getScenarioProgress(userId, scenarioId);
       
-      console.log(`getScenarioProgressPercentage - ${scenarioId}:`, {
-        progressData,
-        completed: progressData?.completed
-      });
+      // console.log(`getScenarioProgressPercentage - ${scenarioId}:`, {
+      //   progressData,
+      //   completed: progressData?.completed
+      // });
       
       if (progressData && progressData.completed) {
-        console.log(`${scenarioId} tamamlanmış, %100 döndürülüyor`);
+        // console.log(`${scenarioId} tamamlanmış, %100 döndürülüyor`);
         return 100; // Tamamlanmış
       }
 
       // Adım ilerlemesini kontrol et (yarıda bırakılmış senaryolar için)
       const stepProgress = await this.getStepProgress(userId, scenarioId);
       
-      console.log(`getScenarioProgressPercentage - ${scenarioId} stepProgress:`, stepProgress);
+      // console.log(`getScenarioProgressPercentage - ${scenarioId} stepProgress:`, stepProgress);
       
       if (stepProgress) {
         // Tamamlanan adım sayısını hesapla
@@ -304,11 +304,11 @@ export const progressService = {
         const totalSteps = scenarioStepCounts[scenarioId] || 10;
         const percentage = Math.round((completedSteps / totalSteps) * 100);
         
-        console.log(`${scenarioId} hesaplama:`, {
-          completedSteps,
-          totalSteps,
-          percentage
-        });
+        // console.log(`${scenarioId} hesaplama:`, {
+        //   completedSteps,
+        //   totalSteps,
+        //   percentage
+        // });
         
         // Eğer tüm adımlar tamamlandıysa %100 döndür, yoksa maksimum %99
         if (completedSteps >= totalSteps) {
