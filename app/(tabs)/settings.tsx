@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { Volume2, VolumeX, Moon, Sun, Globe, Users, CircleHelp as HelpCircle, Shield, Bell, Smartphone, ChevronRight, LogOut } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { router } from 'expo-router';
 
 export default function SettingsPage() {
   const { signOut } = useAuth();
@@ -89,21 +88,7 @@ export default function SettingsPage() {
           title: 'Ebeveyn Kontrolü',
           description: 'İlerleme raporları ve ayarlar',
           type: 'navigation',
-          onPress: () => {
-            // Expo Router ile parental-control sayfasına yönlendir
-            // Eğer router import edilmediyse ekle
-            // import { router } from 'expo-router';
-            // router.push('/(tabs)/parental-control');
-            // Direkt import ve push
-            // (import yukarıda kontrol edilecek)
-            //
-            // router.push('/(tabs)/parental-control');
-            //
-            // Kodun başına ekle: import { router } from 'expo-router';
-            //
-            // Burada sadece fonksiyon olarak bırakıyoruz:
-            router.push('/(tabs)/parental-control');
-          },
+          onPress: () => {},
         },
         {
           icon: Shield,
