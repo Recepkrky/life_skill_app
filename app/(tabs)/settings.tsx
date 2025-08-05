@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -6,16 +6,22 @@ import {
   TouchableOpacity, 
   StyleSheet,
   Switch,
-  Alert 
+  Alert,
+  Modal,
+  ActivityIndicator
 } from 'react-native';
-import { Volume2, VolumeX, Moon, Sun, Globe, Users, CircleHelp as HelpCircle, Shield, Bell, Smartphone, ChevronRight, LogOut } from 'lucide-react-native';
+import { Volume2, VolumeX, Moon, Sun, Globe, Users, CircleHelp as HelpCircle, Shield, Bell, Smartphone, ChevronRight, LogOut, X } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
+import { progressService } from '@/utils/supabase';
 
 export default function SettingsPage() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [showParentalControl, setShowParentalControl] = useState(false);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSignOut = () => {
     Alert.alert(
@@ -38,55 +44,36 @@ export default function SettingsPage() {
     );
   };
 
+  const handleParentalControl = async () => {
+    setShowParentalControl(true);
+    setLoading(true);
+    
+    if (user?.id) {
+      try {
+        const result = await progressService.getUserStats(user.id);
+        setStats(result);
+      } catch (e) {
+        setStats(null);
+      }
+    }
+    setLoading(false);
+  };
+
   const settingSections = [
-    {
-      title: 'Erişilebilirlik',
-      items: [
-        {
-          icon: soundEnabled ? Volume2 : VolumeX,
-          title: 'Ses Efektleri',
-          description: 'Buton sesleri ve geri bildirimler',
-          type: 'switch',
-          value: soundEnabled,
-          onToggle: setSoundEnabled,
-        },
-        {
-          icon: Smartphone,
-          title: 'Ses Komutları',
-          description: 'Sesli girdi ve komutlar',
-          type: 'switch',
-          value: voiceEnabled,
-          onToggle: setVoiceEnabled,
-        },
-      ],
-    },
-    {
-      title: 'Bildirimler',
-      items: [
-        {
-          icon: Bell,
-          title: 'Hatırlatmalar',
-          description: 'Günlük pratik hatırlatmaları',
-          type: 'switch',
-          value: notifications,
-          onToggle: setNotifications,
-        },
-      ],
-    },
     {
       title: 'Genel',
       items: [
         {
-          icon: Globe,
-          title: 'Dil',
-          description: 'Türkçe',
-          type: 'navigation',
-          onPress: () => {},
-        },
-        {
           icon: Users,
           title: 'Ebeveyn Kontrolü',
           description: 'İlerleme raporları ve ayarlar',
+          type: 'navigation',
+          onPress: handleParentalControl,
+        },
+        {
+          icon: Globe,
+          title: 'Dil',
+          description: 'Türkçe',
           type: 'navigation',
           onPress: () => {},
         },
@@ -103,6 +90,32 @@ export default function SettingsPage() {
           description: 'SSS ve iletişim',
           type: 'navigation',
           onPress: () => {},
+        },
+      ],
+    },
+    {
+      title: 'Erişilebilirlik',
+      items: [
+        {
+          icon: soundEnabled ? Volume2 : VolumeX,
+          title: 'Ses Efektleri',
+          description: 'Buton sesleri ve geri bildirimler',
+          type: 'switch',
+          value: soundEnabled,
+          onToggle: setSoundEnabled,
+        },
+      ],
+    },
+    {
+      title: 'Bildirimler',
+      items: [
+        {
+          icon: Bell,
+          title: 'Hatırlatmalar',
+          description: 'Günlük pratik hatırlatmaları',
+          type: 'switch',
+          value: notifications,
+          onToggle: setNotifications,
         },
       ],
     },
@@ -194,6 +207,49 @@ export default function SettingsPage() {
           </Text>
         </View>
       </View>
+
+      {/* Parental Control Modal */}
+      <Modal
+        visible={showParentalControl}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowParentalControl(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <View style={styles.modalHeaderContent}>
+              <Shield size={36} color="#4A90E2" />
+              <Text style={styles.modalTitle}>Ebeveyn Kontrolü</Text>
+              <Text style={styles.modalSubtitle}>Çocuğunuzun uygulamadaki ilerleme analizini görüntüleyin.</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowParentalControl(false)}
+            >
+              <X size={24} color="#7F8C8D" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.modalCard}>
+              {loading ? (
+                <ActivityIndicator size="large" color="#4A90E2" />
+              ) : stats ? (
+                <>
+                  <Text style={styles.analysisTitle}>İlerleme Analizi</Text>
+                  <Text style={styles.analysisText}>Tamamlanan Senaryo: {stats.total_scenarios_completed}</Text>
+                  <Text style={styles.analysisText}>Toplam Puan: {stats.total_score}</Text>
+                  <Text style={styles.analysisText}>Toplam Süre: {Math.floor((stats.total_time_spent || 0) / 60)} dk</Text>
+                  <Text style={styles.analysisText}>Mevcut Seri: {stats.current_streak} gün</Text>
+                  <Text style={styles.analysisText}>En Uzun Seri: {stats.longest_streak} gün</Text>
+                </>
+              ) : (
+                <Text style={styles.analysisText}>İlerleme verisi bulunamadı.</Text>
+              )}
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -303,5 +359,71 @@ const styles = StyleSheet.create({
     color: '#7F8C8D',
     textAlign: 'center',
     lineHeight: 20,
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    paddingTop: 60,
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  modalHeaderContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginTop: 8,
+  },
+  modalSubtitle: {
+    fontSize: 15,
+    color: '#7F8C8D',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  closeButton: {
+    padding: 8,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    alignItems: 'center',
+  },
+  analysisTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 12,
+  },
+  analysisText: {
+    fontSize: 16,
+    color: '#4A90E2',
+    marginBottom: 8,
   },
 });

@@ -32,9 +32,9 @@ const categories = [
   { id: 'all', name: 'Tümü', icon: Filter, color: '#4A90E2' },
   { id: 'Günlük', name: 'Günlük', icon: Coffee, color: '#FF6B35' },
   { id: 'Ulaşım', name: 'Ulaşım', icon: Car, color: '#4ECDC4' },
-  { id: 'Sağlık', name: 'Sağlık', icon: Users, color: '#FFD93D' },
+  { id: 'Sağlık', name: 'Sağlık', icon: Heart, color: '#FF6B6B' },
   { id: 'Teknoloji', name: 'Teknoloji', icon: Phone, color: '#9B59B6' },
-  { id: 'Eğitim', name: 'Eğitim', icon: BookOpen, color: '#3498DB' },
+  { id: 'Toplum', name: 'Toplum', icon: Users, color: '#3498DB' },
 ];
 
 export default function ScenariosPage() {

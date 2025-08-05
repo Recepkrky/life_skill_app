@@ -58,6 +58,56 @@ export default function ScenarioPage() {
     if (!user || !scenario) return;
 
     try {
+      // Önce senaryonun tamamlanıp tamamlanmadığını kontrol et
+      const progressData = await progressService.getScenarioProgress(user.id, id as string);
+      
+      console.log('Senaryo durumu kontrol ediliyor:', {
+        scenarioId: id,
+        progressData,
+        completed: progressData?.completed
+      });
+      
+      if (progressData && progressData.completed) {
+        // Senaryo tamamlanmışsa farklı mesaj göster
+        Alert.alert(
+          'Senaryo Tamamlandı',
+          'Bu senaryoyu bitirdiniz! Tekrar başlamak istediğinize emin misiniz?',
+          [
+            {
+              text: 'Evet',
+              onPress: async () => {
+                // Senaryo tamamlama verilerini sil
+                if (user) {
+                  try {
+                    await progressService.deleteScenarioProgress(user.id, id as string);
+                  } catch (error) {
+                    console.error('Senaryo tamamlama verilerini silme hatası:', error);
+                  }
+                }
+                
+                resetScenario();
+                setIsLoading(false);
+                Animated.timing(fadeAnim, {
+                  toValue: 1,
+                  duration: 800,
+                  useNativeDriver: true,
+                }).start();
+              },
+              style: 'default',
+            },
+            {
+              text: 'Hayır',
+              onPress: () => {
+                router.back(); // Ana sayfaya dön
+              },
+              style: 'cancel',
+            },
+          ]
+        );
+        return;
+      }
+
+      // Senaryo tamamlanmamışsa adım ilerlemesini kontrol et
       const stepProgress = await progressService.getStepProgress(user.id, id as string);
       
       if (stepProgress) {
@@ -269,6 +319,7 @@ export default function ScenarioPage() {
     // İlerleme durumunu sıfırla
     if (user) {
       try {
+        // Adım ilerlemesini sil
         await progressService.deleteStepProgress(user.id, id as string);
       } catch (error) {
         console.error('İlerleme sıfırlama hatası:', error);

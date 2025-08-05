@@ -173,6 +173,17 @@ export const progressService = {
     if (error) throw error;
   },
 
+  // Senaryo tamamlama verilerini silme (yeni başlamak için)
+  async deleteScenarioProgress(userId: string, scenarioId: string) {
+    const { error } = await supabase
+      .from('user_progress')
+      .delete()
+      .eq('user_id', userId)
+      .eq('scenario_id', scenarioId);
+
+    if (error) throw error;
+  },
+
   // Senaryo tamamlama kaydetme
   async saveScenarioProgress(
     userId: string,
@@ -285,7 +296,7 @@ export const progressService = {
       
       if (stepProgress) {
         // Tamamlanan adım sayısını hesapla
-        // current_step_index 0'dan başlıyor, tamamlanan adım sayısı current_step_index
+        // current_step_index şu anki adımın index'i, tamamlanan adım sayısı current_step_index
         const completedSteps = stepProgress.current_step_index;
         
         // Senaryo toplam adım sayısını al
@@ -304,14 +315,16 @@ export const progressService = {
         const totalSteps = scenarioStepCounts[scenarioId] || 10;
         const percentage = Math.round((completedSteps / totalSteps) * 100);
         
-        // console.log(`${scenarioId} hesaplama:`, {
-        //   completedSteps,
-        //   totalSteps,
-        //   percentage
-        // });
+        console.log(`${scenarioId} hesaplama:`, {
+          completedSteps,
+          totalSteps,
+          percentage,
+          stepProgress
+        });
         
         // Eğer tüm adımlar tamamlandıysa %100 döndür, yoksa maksimum %99
         if (completedSteps >= totalSteps) {
+          console.log(`${scenarioId} tüm adımlar tamamlandı, %100 döndürülüyor`);
           return 100;
         }
         return Math.min(percentage, 99);

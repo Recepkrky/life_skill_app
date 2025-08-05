@@ -25,7 +25,7 @@ export interface SimpleScenario {
   color: string;
   steps: ScenarioStep[];
   completed: boolean;
-  category: 'Günlük' | 'Ulaşım' | 'Sağlık' | 'Toplum';
+  category: 'Günlük' | 'Ulaşım' | 'Sağlık' | 'Toplum' | 'Teknoloji';
   maxScore: number; // Senaryo tamamlandığında verilecek maksimum puan
 }
 
@@ -38,7 +38,7 @@ export const scenarios: SimpleScenario[] = [
     icon: Phone,
     color: '#FF6B35',
     completed: false,
-    category: 'Toplum',
+    category: 'Teknoloji',
     maxScore: 30,
     steps: [
       {
@@ -708,7 +708,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-1',
         question: 'Gara girdin. Gişeyi bulman gerekiyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1505842465776-3f8a8e0aebf2',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Sessizce dolaşırım',       isCorrect: false, feedback: 'Sormak daha hızlı ve doğru olur.' },
           { id: 'b', text: 'Görevliye gişeyi sorarım', isCorrect: true,  feedback: 'Yardım istemek zamanı kazandırır.' },
@@ -721,7 +721,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-2',
         question: 'Gişeye geldin. "Nereye gideceksiniz?" diye soruyorlar.',
-        imageUrl: 'https://images.unsplash.com/photo-1562184552-08a38e5bc198',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Bilmiyorum',                isCorrect: false, feedback: 'Nereye gideceğini söylemelisin.' },
           { id: 'b', text: 'Para yok',                  isCorrect: false, feedback: 'Önce nereye gideceğini söyle.' },
@@ -735,7 +735,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-3',
         question: 'Gişe "Tek yön mü, gidiş-dönüş mü?" diye soruyor.',
-        imageUrl: 'https://images.unsplash.com/photo-1518544887878-6d5ceaf2d6c5',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Hiçbiri',                 isCorrect: false, feedback: 'Birini seçmelisin.' },
           { id: 'b', text: 'Ben karar vermem',        isCorrect: false, feedback: 'Gitmek için karar vermelisin.' },
@@ -749,7 +749,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-4',
         question: 'Ödeme zamanı. "Kart mı nakit mi?" diye soruluyor.',
-        imageUrl: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Ödemek istemiyorum', isCorrect: false, feedback: 'Bir ödeme yöntemi seçmelisin.' },
           { id: 'b', text: 'Kart ile ödeyeyim', isCorrect: true,  feedback: 'Kartla ödemeyi seçtin.' },
@@ -763,7 +763,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-5',
         question: 'POS cihazı kartı okutmanı istiyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1523289333742-be1143f6b766',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Kartı vermem',           isCorrect: false, feedback: 'Ödeme için kartı kullanmalısın.' },
           { id: 'b', text: 'Yanlış kart kullanırım', isCorrect: false, feedback: 'Doğru kartı kullanmak gerekir.' },
@@ -777,7 +777,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-6',
         question: 'Biletini aldın. "Peron 3" yazıyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1505842465776-3f8a8e0aebf2',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: "Peron 1'e giderim", isCorrect: false, feedback: 'Biletindeki perona gitmelisin.' },
           { id: 'b', text: 'Otobüse binerim',   isCorrect: false, feedback: 'Trenle gidiyorsun, perona git.' },
@@ -791,7 +791,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-7',
         question: 'Peronda tren bekliyorsun. Anons yapılıyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1526413232644-2b6d2d2b6b86',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Anonsu dikkatle dinlerim', isCorrect: true,  feedback: 'Anonslar önemli bilgi içerir.' },
           { id: 'b', text: 'Kulaklık takıp duymam',     isCorrect: false, feedback: 'Anonsu duyman gerekir.' },
@@ -805,7 +805,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-8',
         question: 'Tren geldi. Kapı açıldı. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1529119368496-6ca1711b4946',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'İterek geçerim',        isCorrect: false, feedback: 'Nazikçe sıranı beklemelisin.' },
           { id: 'b', text: 'Hiç binmem',            isCorrect: false, feedback: 'Trene binmen gerekiyor.' },
@@ -819,7 +819,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-9',
         question: 'Koltuk numaran 12A. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1605727216803-18c3b4bcd7d0',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Rastgele bir koltuğa otururum', isCorrect: false, feedback: 'Numarana oturman gerekir.' },
           { id: 'b', text: '12A koltuğunu bulup otururum', isCorrect: true,  feedback: 'Doğru koltuğuna oturdun.' },
@@ -833,7 +833,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-10',
         question: 'Bilet kontrolü geliyor. Görevli bilet istiyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1518544887878-6d5ceaf2d6c5',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Biletimi saklarım',   isCorrect: false, feedback: 'Görevliye göstermek zorundasın.' },
           { id: 'b', text: 'Başka birine veririm', isCorrect: false, feedback: 'Kendi biletini göstermelisin.' },
@@ -847,7 +847,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-11',
         question: 'Görevli "İyi yolculuklar" diyor. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1526413232644-2b6d2d2b6b86',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Cevap vermem',    isCorrect: false, feedback: 'Nazik bir söze cevap vermek gerekir.' },
           { id: 'b', text: 'Kızarım',         isCorrect: false, feedback: 'Nazikçe teşekkür etmek gerekir.' },
@@ -861,7 +861,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-12',
         question: 'Yanındaki yolcu konuşmak istiyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Bağırırım',                  isCorrect: false, feedback: 'Nazik olmak önemli.' },
           { id: 'b', text: 'Nazikçe kısa sohbet ederim', isCorrect: true,  feedback: 'Nazikçe iletişim kurdun.' },
@@ -875,7 +875,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-13',
         question: 'Tuvalete gitmek istiyorsun. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1582813611290-7f0c2d6c1b2a',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Tuvaleti bulup sırayla girerim', isCorrect: true,  feedback: 'Sıranı beklemek doğru davranış.' },
           { id: 'b', text: 'Vagonda bağırırım',              isCorrect: false, feedback: 'Sakin ol ve tuvaleti bul.' },
@@ -889,7 +889,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-14',
         question: 'Anons: "Tren 5 dakika geç kalacak." Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1526413232644-2b6d2d2b6b86',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Panik yaparım',        isCorrect: false, feedback: 'Panik yapmak çözüm değil.' },
           { id: 'b', text: 'Trenden inerim',       isCorrect: false, feedback: 'Varış yerine henüz gelmedin.' },
@@ -903,7 +903,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-15',
         question: 'Açlık hissettin. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: "Başkalarının yemeğini alırım",  isCorrect: false, feedback: "Başkasının eşyasını almak doğru değil." },
           { id: 'b', text: 'Atıştırmalık çantamdan alırım', isCorrect: true,  feedback: 'Kendi yiyeceğini yemekte sorun yok.' },
@@ -917,7 +917,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-16',
         question: 'Telefonun çalıyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Sessiz konuşurum',       isCorrect: true,  feedback: 'Diğer yolcuları rahatsız etmemek önemli.' },
           { id: 'b', text: 'Yüksek sesle bağırırım', isCorrect: false, feedback: 'Diğer yolcuları rahatsız etme.' },
@@ -931,7 +931,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-17',
         question: 'Yanlış vagonda olduğunu fark ettin. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1529119368496-6ca1711b4946',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Panik yaparım',                        isCorrect: false, feedback: 'Sakin ol ve yardım iste.' },
           { id: 'b', text: 'Koşarak kaçırım',                      isCorrect: false, feedback: 'Sakince doğru yeri bul.' },
@@ -945,7 +945,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-18',
         question: 'Varışa 10 dakika kaldı. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1505842465776-3f8a8e0aebf2',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Eşyaları bırakırım',    isCorrect: false, feedback: 'Eşyalarını unutmamak için toparla.' },
           { id: 'b', text: 'Eşyalarımı toparlarım', isCorrect: true,  feedback: 'Hazırlıklı olmak iyi fikirdir.' },
@@ -959,7 +959,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-19',
         question: 'Tren durdu. Kapı açılınca ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1526413232644-2b6d2d2b6b86',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'İterek çıkarım',           isCorrect: false, feedback: 'Sırayla ve nazikçe inmelisin.' },
           { id: 'b', text: 'İnmem, otururum',          isCorrect: false, feedback: 'Varış yerindesin, inmelisin.' },
@@ -973,7 +973,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-20',
         question: 'İstasyonda çıkış tabelası görüyorsun. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1505842465776-3f8a8e0aebf2',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Rastgele yürürüm',      isCorrect: false, feedback: 'Tabelaları takip etmek daha doğru.' },
           { id: 'b', text: 'Yanlış kapıya giderim', isCorrect: false, feedback: 'Doğru çıkışı bulmalısın.' },
@@ -987,7 +987,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-21',
         question: 'Danışma gördün, yol sorabilir misin?',
-        imageUrl: 'https://images.unsplash.com/photo-1519751138087-5ac7f42f7f19',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Bağırırım',             isCorrect: false, feedback: 'Nazik olmak her zaman iyidir.' },
           { id: 'b', text: 'Nazikçe adres sorarım', isCorrect: true,  feedback: 'Nazikçe sormak doğru.' },
@@ -1001,7 +1001,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-22',
         question: 'Çantanı kontrol ettin mi?',
-        imageUrl: 'https://images.unsplash.com/photo-1514088930629-2c4f79937d35',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Evet, her şey yanımda', isCorrect: true,  feedback: 'Eşyalarını kontrol etmek önemli.' },
           { id: 'b', text: 'Kontrol etmem',         isCorrect: false, feedback: 'Eşyalarını kontrol etmelisin.' },
@@ -1015,7 +1015,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-23',
         question: 'Çıkışta turnike var. Biletin geçerli mi?',
-        imageUrl: 'https://images.unsplash.com/photo-1505842465776-3f8a8e0aebf2',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Turnikeyi atlarım',           isCorrect: false, feedback: 'Turnikeyi atlamak yanlış davranış.' },
           { id: 'b', text: 'Biletimi kaybettim',          isCorrect: false, feedback: 'Biletini dikkatli kullanmalısın.' },
@@ -1029,7 +1029,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'tren-24',
         question: 'İstasyondan çıktın. Yolculuk bitti. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1526413232644-2b6d2d2b6b86',
+        imageUrl: 'https://www.huseyinsayin.com/wp-content/uploads/bernina-ekspresseyahati-2.jpeg',
         options: [
           { id: 'a', text: 'Geri dönerim',                  isCorrect: false, feedback: 'Artık hedefe doğru ilerlemelisin.' },
           { id: 'b', text: 'Hedefime doğru sakinçe yürürüm', isCorrect: true,  feedback: 'Sakin ve dikkatli ilerlemek iyi.' },
@@ -1041,12 +1041,10 @@ export const scenarios: SimpleScenario[] = [
       }
     ]
   },
-
-  // Yeni Senaryo: Postaneden Kargo Gönderme
   {
     id: 'post-office-shipment',
     title: 'Postaneden Kargo Gönderme',
-    description: 'Görevliyle iletişim kurarak kargo gönderimi yapmak',
+    description: 'Görevliyle iletişim kursarak kargo gönderimi yapmak',
     difficulty: 'Orta',
     icon: Briefcase,
     color: '#FF9800',
@@ -1057,7 +1055,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step1',
         question: 'Postaneye girdin, görevli "Hoş geldiniz" dedi. Ne söylersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1607083203389-8429b47c86a8',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Fiyatlar ne kadar?', isCorrect: false, feedback: 'Önce ne yapmak istediğini belirtmelisin.' },
           { id: 'b', text: 'Sessiz kalırım', isCorrect: false, feedback: 'İlk adımda konuşmak önemli.' },
@@ -1070,7 +1068,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step2',
         question: 'Görevli "Ne göndereceksiniz?" diye sordu. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1599470136316-1e1a4f6fda63',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Hiçbir şey', isCorrect: false, feedback: 'Bir şey gönderiyorsun, belirtmen gerekir.' },
           { id: 'b', text: 'Bir kutu belge göndereceğim', isCorrect: true, feedback: 'Ne göndereceğini net belirttin.' },
@@ -1083,7 +1081,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step3',
         question: 'Görevli "Alıcı adresini yazar mısınız?" dedi. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1610484826967-0f4263c8077e',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Yazmak istemem', isCorrect: false, feedback: 'Adres olmadan gönderim yapılamaz.' },
           { id: 'b', text: 'Kendi adresimi yazarım', isCorrect: false, feedback: 'Alıcının adresi gerekli.' },
@@ -1096,7 +1094,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step4',
         question: 'Görevli "Hızlı mı normal kargo mu?" dedi. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1633780350701-d3f926da0a6d',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Hiç fark etmez', isCorrect: false, feedback: 'Bir tercih belirtmelisin.' },
           { id: 'b', text: 'Normal olsun', isCorrect: true, feedback: 'Teslim süresine karar verdin.' },
@@ -1109,7 +1107,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step5',
         question: 'Görevli "Gönderinizin içinde belge olduğunu belirttiniz. Islanmaya karşı önlem alınmasını ister misiniz?" diye soruyor. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1611251086975-62b6f38ccdb7',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Evet, su geçirmez poşete koyabilir misiniz?', isCorrect: true, feedback: 'Doğru, belgelerin zarar görmemesi için önlem almak önemlidir.' },
           { id: 'b', text: 'Hayır, bir şey olmaz', isCorrect: false, feedback: 'Belge gönderilerinde önlem almak her zaman daha güvenlidir.' },
@@ -1122,7 +1120,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step6',
         question: 'Görevli paketi tarttı ve fiyat söyledi. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1606744824166-455ed8855795',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Paket ağırmış', isCorrect: false, feedback: 'Görevliye ödeme şekli söylemelisin.' },
           { id: 'b', text: 'Gitmekten vazgeçerim', isCorrect: false, feedback: 'Gönderimi tamamlamak için ödeme yapmalısın.' },
@@ -1135,7 +1133,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step7',
         question: 'Ödeme yapıldı. Görevli "Fiş ister misiniz?" diyor. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1611421718082-f21c305c5a0c',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Evet, alayım', isCorrect: true, feedback: 'Fiş almak ileride lazım olabilir.' },
           { id: 'b', text: 'İstemez', isCorrect: false, feedback: 'Fiş alman önerilir.' },
@@ -1148,7 +1146,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step8',
         question: 'Paketin üstüne barkod etiketi yapıştırılıyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1603126857091-9ff23a86a106',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Bana ne', isCorrect: false, feedback: 'Nazik olmalısın.' },
           { id: 'b', text: 'O ne işe yarıyor?', isCorrect: false, feedback: 'Şüphelenmeden işlemi takip et.' },
@@ -1161,7 +1159,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step9',
         question: 'Görevli "Teslimat takip numaranız budur" diyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1605283164920-542cf3a65d8a',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Gerek yok derim', isCorrect: false, feedback: 'Bu bilgi önemli.' },
           { id: 'b', text: 'Kime lazım?', isCorrect: false, feedback: 'Sana lazım olacak.' },
@@ -1174,7 +1172,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step10',
         question: 'Görevli, kargonun tahmini teslim süresini bildiriyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1589998059171-988d3b4a1aa5',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Beni ilgilendirmez', isCorrect: false, feedback: 'Teslim süresi alıcının planı için önemlidir.' },
           { id: 'b', text: 'Boşverin söylemeyin', isCorrect: false, feedback: 'Bilgi almak senin hakkın ve önemli.' },
@@ -1187,7 +1185,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step11',
         question: 'Çıkışa doğru yürüyorsun. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1578873372346-1572f26fb9c4',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Koşarak çıkarım', isCorrect: false, feedback: 'Sakin olmalısın.' },
           { id: 'b', text: 'Kapıdan dikkatlice çıkarım', isCorrect: true, feedback: 'Dikkatli olmak önemli.' },
@@ -1200,7 +1198,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step12',
         question: 'Postaneden çıktın. Şimdi ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1524678714210-9917a6c619c1',
+        imageUrl: 'https://im.haberturk.com/l/2024/03/01/ver1709300171/3665589/jpg/640x360',
         options: [
           { id: 'a', text: 'Teslimat sürecini takip ederim', isCorrect: true, feedback: 'Kargonun durumunu bilmek önemlidir.' },
           { id: 'b', text: 'Hiç ilgilenmem', isCorrect: false, feedback: 'Takip etmek önemlidir.' },
@@ -1211,8 +1209,6 @@ export const scenarios: SimpleScenario[] = [
       }
     ]
   },
-
-  // Yeni Senaryo: Sinema Bileti Alma
   {
     id: 'cinema-ticket-purchase',
     title: 'Sinema Bileti Alma',
@@ -1227,7 +1223,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step1',
         question: 'Sinema gișesine geldin. Görevli "Hoș geldiniz" dedi. Ne söylersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1596477602103-c6d3bbf4be5b',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Ne var?', isCorrect: false, feedback: 'Nazik olmalısın.' },
           { id: 'b', text: 'Bir bilet almak istiyorum', isCorrect: true, feedback: 'Doğrudan isteğini belirttin.' },
@@ -1240,7 +1236,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step2',
         question: 'Görevli "Hangi filme bilet istiyorsunuz?" diye soruyor. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Avatar filmine', isCorrect: true, feedback: 'Hangi filmi izlemek istediğini belirttin.' },
           { id: 'b', text: 'Bilmiyorum', isCorrect: false, feedback: 'Film seçmelisin.' },
@@ -1253,7 +1249,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step3',
         question: 'Görevli "Kaç kişilik bilet alacaksınız?" diyor. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Bir kişilik', isCorrect: true, feedback: 'Kişi sayısını net belirttin.' },
           { id: 'b', text: 'Bilmiyorum', isCorrect: false, feedback: 'Kişi sayısını belirtmelisin.' },
@@ -1266,7 +1262,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step4',
         question: 'Görevli hangi saat için bilet istediğini soruyor. Ne cevap verirsin?',
-        imageUrl: 'https://images.unsplash.com/photo-1570824109366-0f0aa488c925',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Bilmiyorum, siz seçin', isCorrect: false, feedback: 'Tercihini senin yapman gerekiyor.' },
           { id: 'b', text: 'Bugün değil, yarın', isCorrect: false, feedback: 'Bugünün saatleri sorulmuştu, günü değiştirme doğru değil.' },
@@ -1279,7 +1275,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step5',
         question: 'Görevli, 3 boyutlu gözlük istersen ekstra ücret alınacağını söylüyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1603297631957-6f8ae5b6c2a9',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Evet, gözlük almak istiyorum', isCorrect: true, feedback: 'Doğru, 3D film için gözlük gerekir.' },
           { id: 'b', text: 'Hayır, gözlüğüm zaten var', isCorrect: true, feedback: 'Eğer gözlüğün varsa ekstra ödeme yapmana gerek yok.' },
@@ -1292,7 +1288,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step6',
         question: 'Bilet ücreti söylendi. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Nakit vereyim', isCorrect: true, feedback: 'Nakit ödeme de uygun.' },
           { id: 'b', text: 'Param yok', isCorrect: false, feedback: 'Ödeme yapmalısın.' },
@@ -1305,7 +1301,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step7',
         question: 'Ödeme sonrası görevli "Biletinizi alınız" diyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Bileti almam', isCorrect: false, feedback: 'Bileti mutlaka almalısın.' },
           { id: 'b', text: 'Hiçbir şey söylemem', isCorrect: false, feedback: 'Nazik olmak iyi olur.' },
@@ -1318,7 +1314,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step8',
         question: 'Filme girmeden önce kontrol var. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Bileti saklarım', isCorrect: false, feedback: 'Bileti göstermek gerekir.' },
           { id: 'b', text: 'Hiçbir şey yapmam', isCorrect: false, feedback: 'Bilet kontrolü için biletini göstermelisin.' },
@@ -1331,7 +1327,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step9',
         question: 'Salon girişinde görevli "İyi seyirler" diyor. Ne dersin?',
-        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Hiçbir şey söylemem', isCorrect: false, feedback: 'Nazik olmak iyi olur.' },
           { id: 'b', text: 'Kızarım', isCorrect: false, feedback: 'Nazikçe karşılık vermelisin.' },
@@ -1344,7 +1340,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step10',
         question: 'Salonda yerini buldun. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1517602302552-471fe67acf66',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Koltuk numarama otururum', isCorrect: true, feedback: 'Doğru koltuğa oturdun.' },
           { id: 'b', text: 'Rastgele otururum', isCorrect: false, feedback: 'Kendi koltuğuna oturmalısın.' },
@@ -1357,7 +1353,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step11',
         question: 'Film başlamadan önce telefonun çalıyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Telefonu sessize alırım', isCorrect: true, feedback: 'Çevrendekileri rahatsız etmemek için doğru.' },
           { id: 'b', text: 'Yüksek sesle konuşurum', isCorrect: false, feedback: 'Diğer izleyicileri rahatsız etmemelisin.' },
@@ -1370,7 +1366,7 @@ export const scenarios: SimpleScenario[] = [
       {
         id: 'step12',
         question: 'Film başladı. Yanındaki kişi yüksek sesle konuşuyor. Ne yaparsın?',
-        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        imageUrl: 'https://st2.depositphotos.com/26922084/42111/v/950/depositphotos_421119724-stock-illustration-buying-tickets-to-cinema.jpg',
         options: [
           { id: 'a', text: 'Kavga çıkarırım', isCorrect: false, feedback: 'Nazikçe uyarmak yeterlidir.' },
           { id: 'b', text: 'Hiçbir şey yapmam', isCorrect: false, feedback: 'Rahatsız oluyorsan nazikçe uyarabilirsin.' },
