@@ -354,7 +354,7 @@ export default function AIAssistantPage() {
             <View style={styles.buttonSection}>
               <TouchableOpacity
                 onPress={() => {
-                  console.log('Ana AI asistan butonu tıklandı');
+                  // AI asistan butonuna tıklandı
                   setShowAIAssistant(true);
                 }}
                 style={styles.chatButton}
@@ -376,7 +376,7 @@ export default function AIAssistantPage() {
         <AIAssistant 
           isVisible={showAIAssistant}
           onClose={() => {
-            console.log('AI asistan kapatılıyor');
+            // AI asistan kapatılıyor
             setShowAIAssistant(false);
           }}
         />

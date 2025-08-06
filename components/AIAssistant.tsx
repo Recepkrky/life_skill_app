@@ -56,7 +56,7 @@ export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
   const sendMessage = async () => {
     if (!inputText.trim()) return;
 
-    console.log('Mesaj gönderiliyor:', inputText);
+
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -71,9 +71,9 @@ export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
 
     // Basit yanıt sistemi
     try {
-      console.log('AI servisi çağrılıyor...');
+
       const response = { content: 'AI servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.' };
-      console.log('AI yanıtı alındı:', response);
+
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -98,7 +98,7 @@ export default function AIAssistant({ isVisible, onClose }: AIAssistantProps) {
 
   const testAPI = async () => {
     try {
-      console.log('API test ediliyor...');
+
       const testMessage: Message = {
         id: Date.now().toString(),
         text: '❌ API bağlantısı şu anda kullanılamıyor!',

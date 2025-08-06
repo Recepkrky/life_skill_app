@@ -8,8 +8,9 @@ import {
   Alert,
   Animated,
   Image,
+  AppState // AppState'i ekle
 } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { 
   ArrowLeft,
   RotateCcw,
@@ -39,12 +40,42 @@ export default function ScenarioPage() {
   const [scenarioCompleted, setScenarioCompleted] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{[key: string]: string}>({});
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [totalTimeSpent, setTotalTimeSpent] = useState(0); // toplam süre (saniye cinsinden)
+  const sessionStartTimeRef = useRef<number | null>(null); // aktif oturum başlangıcı (ref)
   const [isLoading, setIsLoading] = useState(true);
+  const [isRestarted, setIsRestarted] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const scenario = getScenarioById(id as string) as SimpleScenario;
   const currentStep = scenario?.steps[currentStepIndex];
+
+  // Senaryo ekranı odaklanınca ve odaktan çıkınca süreyi yönet (sonsuz döngüye girmesin diye ref kullan)
+  useFocusEffect(
+    React.useCallback(() => {
+      sessionStartTimeRef.current = Date.now();
+      let appStateListener: any;
+      let lastAppState = 'active';
+      appStateListener = AppState.addEventListener('change', (nextAppState) => {
+        if (lastAppState === 'active' && nextAppState.match(/inactive|background/)) {
+          if (sessionStartTimeRef.current) {
+            setTotalTimeSpent(prev => prev + Math.floor((Date.now() - sessionStartTimeRef.current!) / 1000));
+            sessionStartTimeRef.current = null;
+          }
+        }
+        if (lastAppState.match(/inactive|background/) && nextAppState === 'active') {
+          sessionStartTimeRef.current = Date.now();
+        }
+        lastAppState = nextAppState;
+      });
+      return () => {
+        if (sessionStartTimeRef.current) {
+          setTotalTimeSpent(prev => prev + Math.floor((Date.now() - sessionStartTimeRef.current!) / 1000));
+          sessionStartTimeRef.current = null;
+        }
+        if (appStateListener) appStateListener.remove();
+      };
+    }, [user, id]) // sadece sabit parametreler
+  );
 
   useEffect(() => {
     if (scenario) {
@@ -60,13 +91,6 @@ export default function ScenarioPage() {
     try {
       // Önce senaryonun tamamlanıp tamamlanmadığını kontrol et
       const progressData = await progressService.getScenarioProgress(user.id, id as string);
-      
-      console.log('Senaryo durumu kontrol ediliyor:', {
-        scenarioId: id,
-        progressData,
-        completed: progressData?.completed
-      });
-      
       if (progressData && progressData.completed) {
         // Senaryo tamamlanmışsa farklı mesaj göster
         Alert.alert(
@@ -74,18 +98,28 @@ export default function ScenarioPage() {
           'Bu senaryoyu bitirdiniz! Tekrar başlamak istediğinize emin misiniz?',
           [
             {
-              text: 'Evet',
+              text: 'İptal',
+              style: 'cancel',
+              onPress: () => router.back(),
+            },
+            {
+              text: 'Tekrar Dene',
               onPress: async () => {
                 // Senaryo tamamlama verilerini sil
-                if (user) {
-                  try {
-                    await progressService.deleteScenarioProgress(user.id, id as string);
-                  } catch (error) {
-                    console.error('Senaryo tamamlama verilerini silme hatası:', error);
-                  }
-                }
+                await progressService.deleteScenarioProgress(user.id, id as string);
                 
-                resetScenario();
+                // State'leri sıfırla
+                setCurrentStepIndex(0);
+                setSelectedOption(null);
+                setShowFeedback(false);
+                setIsCorrect(false);
+                setScenarioCompleted(false);
+                setCorrectAnswers(0);
+                setUserAnswers({});
+                setTotalTimeSpent(0); // Reset total time
+                sessionStartTimeRef.current = Date.now(); // Reset session start time
+                setIsRestarted(true);
+                
                 setIsLoading(false);
                 Animated.timing(fadeAnim, {
                   toValue: 1,
@@ -93,14 +127,6 @@ export default function ScenarioPage() {
                   useNativeDriver: true,
                 }).start();
               },
-              style: 'default',
-            },
-            {
-              text: 'Hayır',
-              onPress: () => {
-                router.back(); // Ana sayfaya dön
-              },
-              style: 'cancel',
             },
           ]
         );
@@ -134,7 +160,8 @@ export default function ScenarioPage() {
               onPress: () => {
                 setCurrentStepIndex(stepProgress.current_step_index);
                 setUserAnswers(stepProgress.user_answers || {});
-                setStartTime(new Date(stepProgress.start_time).getTime());
+                setTotalTimeSpent(stepProgress.time_spent || 0);
+                sessionStartTimeRef.current = Date.now();
                 setIsLoading(false);
                 Animated.timing(fadeAnim, {
                   toValue: 1,
@@ -209,20 +236,21 @@ export default function ScenarioPage() {
         const finalStepIndex = scenario.steps.length - 1;
         saveStepProgress(finalStepIndex, newUserAnswers);
         
-        // Senaryo tamamlanma verisini direkt kaydet
-        if (user) {
-          const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+        // Eğer senaryo tekrar başlatılmışsa, tamamlanma verilerini kaydetme
+        if (!isRestarted && user) {
+          const timeSpent = totalTimeSpent + (sessionStartTimeRef.current ? Math.floor((Date.now() - sessionStartTimeRef.current) / 1000) : 0);
           const correctAnswers = calculateCorrectAnswers();
           const score = calculateScore(scenario, correctAnswers);
           
-          console.log('Senaryo tamamlanıyor:', {
+          // Senaryo tamamlanıyor
+          const scenarioData = {
             userId: user.id,
             scenarioId: id,
             score,
             correctAnswers,
             totalSteps: scenario.steps.length,
             timeSpent
-          });
+          };
           
           progressService.saveScenarioProgress(
             user.id,
@@ -232,7 +260,7 @@ export default function ScenarioPage() {
             scenario.steps.length,
             timeSpent
           ).then((result) => {
-            console.log('Senaryo başarıyla tamamlandı:', result);
+            // Senaryo başarıyla tamamlandı
             // Kullanıcı istatistiklerini güncelle
             progressService.updateUserStats(user.id);
             // Adım ilerlemesini sil
@@ -314,7 +342,8 @@ export default function ScenarioPage() {
     setScenarioCompleted(false);
     setCorrectAnswers(0);
     setUserAnswers({});
-    setStartTime(Date.now());
+    setTotalTimeSpent(0); // Reset total time
+    sessionStartTimeRef.current = Date.now(); // Reset session start time
 
     // İlerleme durumunu sıfırla
     if (user) {
@@ -433,7 +462,7 @@ export default function ScenarioPage() {
                      );
                     
                     // Senaryo tamamlanma verisini kaydet
-                    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+                    const timeSpent = totalTimeSpent + (sessionStartTimeRef.current ? Math.floor((Date.now() - sessionStartTimeRef.current) / 1000) : 0);
                     await progressService.saveScenarioProgress(
                       user.id,
                       id as string,

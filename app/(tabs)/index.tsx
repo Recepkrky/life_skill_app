@@ -84,22 +84,17 @@ export default function HomePage() {
 
   const loadScenarioProgress = async () => {
     if (!user?.id) return;
-    
-    // console.log('loadScenarioProgress başladı');
-    
+
     const progressData: {[key: string]: number} = {};
     for (const scenario of scenarios) {
       try {
-        // console.log(`${scenario.id} için ilerleme hesaplanıyor...`);
         const percentage = await progressService.getScenarioProgressPercentage(user.id, scenario.id);
-        // console.log(`${scenario.id} ilerleme: ${percentage}%`);
         progressData[scenario.id] = percentage;
       } catch (error) {
         console.error(`Senaryo ${scenario.id} ilerleme hatası:`, error);
         progressData[scenario.id] = 0;
       }
     }
-    // console.log('Tüm ilerleme verileri:', progressData);
     setScenarioProgress(progressData);
   };
 
@@ -141,9 +136,7 @@ export default function HomePage() {
     const minutes = Math.floor((seconds % 3600) / 60);
     return `${hours}s ${minutes}dk`;
   };
-
-
-
+  
   // Senaryoları durumlarına göre sırala
   const sortedScenarios = scenarios.map(scenario => ({
     ...scenario,

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { progressService, analyticsService } from '@/utils/supabase';
+import { scenarios } from '@/data/scenarios';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const getAchievements = (userStats: any) => {
@@ -243,12 +244,12 @@ export default function ProfilePage() {
               <TrendingUp size={24} color="#FFFFFF" strokeWidth={2} />
             </View>
             <Text style={styles.statValue}>
-              {userStats && userStats.total_scenarios_completed > 0 
-                ? `${Math.round((userStats.total_score / (userStats.total_scenarios_completed * 100)) * 100)}%`
+              {userStats && scenarios.length > 0 
+                ? `${Math.round((userStats.total_scenarios_completed / scenarios.length) * 100)}%`
                 : '0%'
               }
             </Text>
-            <Text style={styles.statLabel}>Başarı Oranı</Text>
+            <Text style={styles.statLabel}>İlerleme Durumu</Text>
           </View>
           
           <View style={styles.statCard}>

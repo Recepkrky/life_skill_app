@@ -33,7 +33,7 @@ export const scenarios: SimpleScenario[] = [
   {
     id: 'smartphone-basics',
     title: 'Akıllı Telefon Kullanımı',
-    description: 'Temel telefon işlemleri ve uygulama kullanımı',
+    description: 'Telefonda mesaj gönderme ve uygulama kullanımı',
     difficulty: 'Kolay',
     icon: Phone,
     color: '#FF6B35',
@@ -181,7 +181,7 @@ export const scenarios: SimpleScenario[] = [
   {
     id: 'bus-simple',
     title: 'Otobüs Yolculuğu',
-    description: 'Bilet alma ve inmek isteme',
+    description: 'Otobüse binme ve yolculuğu tamamlama',
     difficulty: 'Kolay',
     icon: Bus,
     color: '#7ED321',
@@ -391,7 +391,7 @@ export const scenarios: SimpleScenario[] = [
     color: '#FFD180',
     completed: false,
     category: 'Günlük',
-    maxScore: 80,
+    maxScore: 70,
     steps: [
       {
         id: 'rest-1',
@@ -1044,13 +1044,13 @@ export const scenarios: SimpleScenario[] = [
   {
     id: 'post-office-shipment',
     title: 'Postaneden Kargo Gönderme',
-    description: 'Görevliyle iletişim kursarak kargo gönderimi yapmak',
+    description: 'Görevliyle iletişim kurarak kargo gönderimi yapmak',
     difficulty: 'Orta',
     icon: Briefcase,
     color: '#FF9800',
     completed: false,
     category: 'Günlük',
-    maxScore: 130,
+    maxScore: 120,
     steps: [
       {
         id: 'step1',
@@ -1218,7 +1218,7 @@ export const scenarios: SimpleScenario[] = [
     color: '#673AB7',
     completed: false,
     category: 'Toplum',
-    maxScore: 130,
+    maxScore: 120,
     steps: [
       {
         id: 'step1',

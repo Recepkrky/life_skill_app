@@ -9,11 +9,11 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 // API key test fonksiyonu
 const testAPIKey = async () => {
   try {
-    console.log('API Key test ediliyor...');
+    // API Key test ediliyor
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent("Merhaba");
     const response = await result.response;
-    console.log('API Key çalışıyor:', response.text());
+    // API Key çalışıyor
     return true;
   } catch (error) {
     console.error('API Key hatası:', error);
@@ -304,7 +304,7 @@ export const aiService = {
 
   // Gemini AI ile gerçek AI yanıtı al
   async generateResponse(userMessage: string, userId: string) {
-    console.log('AI generateResponse çağrıldı:', userMessage, userId);
+    // AI generateResponse çağrıldı
     
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -323,7 +323,7 @@ Kullanıcı Bilgileri:
 `;
         }
       } catch (error) {
-        console.log('Kullanıcı verileri alınamadı:', error);
+        // Kullanıcı verileri alınamadı
       }
 
       const prompt = `Sen özel bireylere günlük yaşam becerileri öğreten yardımcı bir AI asistanısın. 
@@ -348,7 +348,7 @@ Yanıtını Türkçe olarak ver:`;
       const response = await result.response;
       const text = response.text();
       
-      console.log('Gemini yanıtı:', text);
+      // Gemini yanıtı alındı
 
       return {
         type: 'ai_response',
