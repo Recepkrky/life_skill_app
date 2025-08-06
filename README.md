@@ -1,6 +1,10 @@
-# Life Skill App
+# Life Skill App (Down Sendromlu Özel Bireyler İçin)
 
-Bu uygulama, günlük yaşamda karşılaşılabilecek durumlara yönelik senaryolar ve pratikler sunarak kullanıcıların yaşam becerilerini geliştirmesini amaçlar. Hem gençler hem de yetişkinler için uygundur.
+Bu uygulama, down sendromlu özel bireyler için günlük yaşamda karşılaşılabilecek durumlara yönelik senaryolar ve pratikler sunarak kullanıcıların yaşam becerilerini geliştirmesini amaçlar. 
+
+### Tanıtım Videosu
+[YouTube'da İzle](https://youtu.be/dDQOIa85ScM)
+Video dikey yatay oranı formatından kaynaklı garip durmuş ama normalde uygulamanın dikey yatay oranı normaldir.
 
 ## Özellikler
 
@@ -16,26 +20,28 @@ Bu uygulama, günlük yaşamda karşılaşılabilecek durumlara yönelik senaryo
 ## Kurulum
 
 1. **Depoyu Klonlayın:**
-   ```bash
+   ```
    git clone https://github.com/Recepkrky/life_skill_app.git
-   cd life_skill_app-main\ 2
+   cd life_skill_app-main
    ```
 
 2. **Bağımlılıkları Yükleyin:**
-   ```bash
+   ```
    npm install
    # veya
    yarn install
    ```
 
 3. **Projeyi Başlatın:**
-   ```bash
+   ```
    npx expo start
    ```
    veya
-   ```bash
+   ```
    yarn start
    ```
+
+   Başlattıktan sonra terminalde çıkan QR kodunu **Expo Go** uygulamasıyla (Android) veya kamera uygulamasıyla (iOS) okutarak projeyi telefonunuzda açabilirsiniz.
 
 ## Kullanılan Teknolojiler
 
@@ -62,12 +68,5 @@ Bu uygulama, günlük yaşamda karşılaşılabilecek durumlara yönelik senaryo
 
 ## Katkıda Bulunma
 
-Katkıda bulunmak için lütfen bir fork oluşturun ve pull request gönderin. Hataları veya önerileri Issues sekmesinden bildirebilirsiniz.
+Katkıda bulunmak için lütfen bir fork oluşturun ve pull request gönderin. Hataları veya önerileri Issues sekmesinden bildirebilirsiniz. Hata ve öneriler için maide yollayabilirsiniz. * karakayarecepk@gmail.com * Oyundakiilim@gmail.com
 
-## Lisans
-
-MIT
-
----
-
-Her türlü soru ve öneriniz için iletişime geçebilirsiniz!

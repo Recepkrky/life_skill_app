@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { authService, User } from '@/utils/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   user: User | null;
@@ -68,6 +69,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
+      // Clear all scenario/session progress from AsyncStorage
+      // Remove all keys related to scenario progress and step progress
+      const keys = await AsyncStorage.getAllKeys();
+      const scenarioKeys = keys.filter(k => k.startsWith('scenario_progress_') || k.startsWith('step_progress_'));
+      if (scenarioKeys.length > 0) {
+        await AsyncStorage.multiRemove(scenarioKeys);
+      }
       await authService.signOut();
     } catch (error) {
       console.error('Sign out error:', error);
