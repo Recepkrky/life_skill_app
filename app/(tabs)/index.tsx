@@ -20,7 +20,11 @@ import {
   Phone,
   Star,
   Zap,
-  Flame
+  Flame,
+  Lightbulb,
+  Heart,
+  Shield,
+  Smile
 } from 'lucide-react-native';
 import { scenarios } from '../../data/scenarios';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,6 +34,59 @@ import { useFocusEffect } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
+// Kısa Bilgi Kartları verisi - özel bireylere odaklı
+const infoCards = [
+  {
+    id: 'card1',
+    content: 'Senin hızın en güzel hızdır. Bazıları hızlı, bazıları yavaş öğrenir. Senin yolun sana özeldir. Devam et!',
+    type: 'motivasyon',
+    icon: Heart,
+    color: '#FF6B9D'
+  },
+  {
+    id: 'card2',
+    content: 'Telefon çalarsa önce "Alo" de. Nazikçe konuş, sonra ne söylemek istediğini düşün. Hemen panik yapma.',
+    type: 'bilgi',
+    icon: Phone,
+    color: '#4ECDC4'
+  },
+  {
+    id: 'card3',
+    content: 'Acil durum varsa 112\'yi ara. Yangın, bayılma ya da ciddi kaza gibi durumlarda yardım isteyebilirsin.',
+    type: 'acil',
+    icon: Shield,
+    color: '#FF6B35'
+  },
+  {
+    id: 'card4',
+    content: 'Gülümsemen harika bir selamdır. Her zaman konuşmana gerek yok. Gülümsemen de insanlarla iletişim kurar.',
+    type: 'bilgi',
+    icon: Smile,
+    color: '#FFD93D'
+  },
+  {
+    id: 'card5',
+    content: 'Kendini kötü hissedersen aileni ara. Üzgünsen ya da korktuysan bir büyükten yardım iste.',
+    type: 'acil',
+    icon: Heart,
+    color: '#FF6B9D'
+  },
+  {
+    id: 'card6',
+    content: 'Bugün aynada kendine "Aferin" dedin mi? Düğmeni ilikledin mi? Giyindin mi? Küçük işler de büyük başarıdır.',
+    type: 'motivasyon',
+    icon: Star,
+    color: '#FFD93D'
+  },
+  {
+    id: 'card7',
+    content: 'Sıra beklerken sabırlı olmak çok güzel bir davranış. Sıra sana geldiğinde herkes seni anlayacak.',
+    type: 'bilgi',
+    icon: Lightbulb,
+    color: '#4ECDC4'
+  }
+];
+
 export default function HomePage() {
   const { user } = useAuth();
   const [userStats, setUserStats] = useState<any>(null);
@@ -37,6 +94,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [scenarioStatuses, setScenarioStatuses] = useState<{[key: string]: string}>({});
   const [scenarioProgress, setScenarioProgress] = useState<{[key: string]: number}>({});
+  const [dailyReminder, setDailyReminder] = useState<any>(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -44,6 +102,9 @@ export default function HomePage() {
         loadUserData();
         loadScenarioStatuses();
         loadScenarioProgress();
+        // Her uygulamaya girdiğinde rastgele bir hatırlatma kartı seç
+        const randomCard = infoCards[Math.floor(Math.random() * infoCards.length)];
+        setDailyReminder(randomCard);
       }
     }, [user])
   );
@@ -232,6 +293,28 @@ export default function HomePage() {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* Günlük Hatırlatmalar */}
+      {dailyReminder && (
+        <View style={styles.reminderCard}>
+          <View style={[styles.reminderBackground, { backgroundColor: dailyReminder.color }]}>
+            <View style={styles.reminderContent}>
+              <View style={styles.reminderBadge}>
+                <Text style={styles.reminderBadgeText}>
+                  {dailyReminder.type === 'motivasyon' ? 'MOTİVASYON' : 
+                   dailyReminder.type === 'acil' ? 'ÖNEMLİ' : 'GÜNLÜK BİLGİ'}
+                </Text>
+              </View>
+              <View style={styles.reminderIconContainer}>
+                <dailyReminder.icon size={32} color="#FFFFFF" strokeWidth={2} />
+              </View>
+              <Text style={styles.reminderText}>
+                {dailyReminder.content}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       {/* Today's Challenge */}
       <View style={styles.challengeCard}>
@@ -488,8 +571,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   challengeCard: {
-    marginTop: 18,
-    marginBottom: 28,
+    marginTop: 8,
+    marginBottom: 12,
     marginHorizontal: 16,
     borderRadius: 28,
     overflow: 'hidden',
@@ -504,6 +587,67 @@ const styles = StyleSheet.create({
     borderColor: '#B4C7F8',
     backgroundColor: '#2E4B7E',
     padding: 0,
+  },
+  reminderCard: {
+    marginTop: 12,
+    marginBottom: 8,
+    marginHorizontal: 16,
+    borderRadius: 28,
+    overflow: 'hidden',
+    height: 320,
+    width: 'auto',
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: '#FFFFFF',
+    padding: 0,
+  },
+  reminderBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  reminderContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  reminderBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  reminderBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  reminderIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  reminderText: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    lineHeight: 26,
+    textAlign: 'center',
+    fontWeight: '500',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   challengeBackground: {
     flex: 1,
