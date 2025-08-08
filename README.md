@@ -3,7 +3,7 @@
 Bu uygulama, down sendromlu özel bireyler için günlük yaşamda karşılaşılabilecek durumlara yönelik senaryolar ve pratikler sunarak kullanıcıların yaşam becerilerini geliştirmesini amaçlar. 
 
 ### Tanıtım Videosu
-[YouTube'da İzle](https://youtu.be/dDQOIa85ScM)
+[YouTube'da İzle](https://youtu.be/mg1BNzpHpXE)
 Video dikey yatay oranı formatından kaynaklı garip durmuş ama normalde uygulamanın dikey yatay oranı normaldir.
 
 ## Özellikler
@@ -41,7 +41,7 @@ Video dikey yatay oranı formatından kaynaklı garip durmuş ama normalde uygul
    yarn start
    ```
 
-   Başlattıktan sonra terminalde çıkan QR kodunu **Expo Go** uygulamasıyla (Android) veya kamera uygulamasıyla (iOS) okutarak projeyi telefonunuzda açabilirsiniz.
+   Başlattıktan sonra terminalde çıkan QR kodunu **Expo Go** uygulamasıyla (Android) veya kamera uygulamasıyla (iOS) okutarak projeyi telefonunuzda açabilirsiniz ve test edebilirsiniz.
 
 ## Kullanılan Teknolojiler
 
